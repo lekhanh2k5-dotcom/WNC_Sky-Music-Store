@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Đăng nhập')
+@section('title', 'Quên mật khẩu')
 
 @section('content')
 xin chào 
