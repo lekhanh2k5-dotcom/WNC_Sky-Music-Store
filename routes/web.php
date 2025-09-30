@@ -83,14 +83,16 @@ Route::prefix('admin')->group(function () {
     Route::get('/posts/create', function () {
         return view('admin.posts.create');
     })->name('admin.posts.create');
-    Route::post('/posts/create', [\App\Http\Controllers\Admin\PostController::class, 'store'])->name('admin.posts.store');
+    Route::post('/posts/create', function () {
+        return redirect()->route('admin.posts');
+    })->name('admin.posts.store');
 
     Route::get('/posts/edit/{id}', function ($id) {
         return view('admin.posts.edit');
     })->name('admin.posts.edit');
     
     Route::post('/logout', function () {
-        // Xử lý logout ở đây (placeholder)
+
         return redirect()->route('login');
     })->name('logout');
 });
@@ -116,13 +118,11 @@ Route::prefix('account')->group(function () {
         return view('account.settings');
     })->name('account.settings');
     // Nạp coin (Deposit) page
-    Route::get('/account/deposit', function () {
+    Route::get('/deposit', function () {
         return view('account.deposit');
     })->name('account.deposit');
     // Rút coin (Withdraw) page
-    Route::get('/account/withdraw', function () {
+    Route::get('/withdraw', function () {
         return view('account.withdraw');
     })->name('account.withdraw');
-
-
 });
