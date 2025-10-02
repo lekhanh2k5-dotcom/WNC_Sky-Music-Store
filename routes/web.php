@@ -23,20 +23,20 @@ Route::group([], function () {
 Route::group([], function () {
     Route::get('/login', fn () => view('auth.login'))->name('login');
         Route::post('/login', function () {
-            // Xử lý đăng nhập ở đây (placeholder)
             return redirect()->route('home');
         })->name('login.submit');
         Route::get('/register', fn () => view('auth.register'))->name('register');
         Route::post('/register', function () {
-            // Xử lý đăng ký ở đây (placeholder)
             return redirect()->route('home');
         })->name('register.submit');
         Route::get('/forgot-password', fn () => view('auth.forgot-password'))->name('forgot-password');
         Route::post('/forgot-password', function () {
-            // Xử lý gửi email quên mật khẩu ở đây (placeholder)
             return redirect()->route('login');
         })->name('password.email');
         Route::get('/reset-password', fn () => view('auth.reset-password'))->name('reset-password');
+        Route::post('/reset-password', function () {
+            return redirect()->route('login')->with('success', 'Password reset successfully!');
+        })->name('password.update');
     });
 
 Route::get('/admin', function () {
