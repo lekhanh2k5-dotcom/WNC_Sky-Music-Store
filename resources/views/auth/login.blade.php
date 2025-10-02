@@ -1,7 +1,0 @@
-@extends('layouts.app')
-
-@section('title', 'Đăng nhập')
-
-@section('content')
-xin chào 
-@endsection
