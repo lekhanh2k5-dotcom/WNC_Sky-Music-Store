@@ -201,15 +201,27 @@
                 <div class="flex items-center gap-6 flex-1">
                     <div class="relative">
                         <div class="w-28 h-28 rounded-full bg-gradient-to-br from-yellow-300 to-pink-400 flex items-center justify-center shadow-xl border-4 border-white overflow-hidden">
-                            <img src="/img/default-avatar.png" alt="Avatar" class="w-full h-full object-cover rounded-full" />
+                            <img src="{{ asset('img/default-avatar.svg') }}" 
+                                 alt="Avatar {{ Auth::user()->name }}" 
+                                 class="w-full h-full object-cover rounded-full"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                            <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center" style="display: none;">
+                                <span class="text-white text-2xl font-bold">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                            </div>
                         </div>
                     </div>
                     <div>
-                        <h2 class="orbitron text-4xl font-extrabold text-white mb-1 drop-shadow">Nguyễn Văn A</h2>
-                        <p class="inter text-lg text-gray-200 mb-2">Thành viên từ 2023</p>
+                        <h2 class="orbitron text-4xl font-extrabold text-white mb-1 drop-shadow">{{ Auth::user()->name }}</h2>
+                        <p class="inter text-lg text-gray-200 mb-2">
+                            @if(Auth::user()->is_admin)
+                                👑 Quản trị viên • Thành viên từ {{ Auth::user()->created_at->format('Y') }}
+                            @else  
+                                🎵 Thành viên từ {{ Auth::user()->created_at->format('Y') }}
+                            @endif
+                        </p>
                         <div class="flex items-center gap-3 mt-2">
                             <span class="coin-spin text-4xl drop-shadow-lg">🪙</span>
-                            <span class="orbitron text-3xl font-extrabold text-yellow-300 drop-shadow">2,450</span>
+                            <span class="orbitron text-3xl font-extrabold text-yellow-300 drop-shadow">0</span>
                             <span class="inter text-base text-yellow-100 tracking-wide ml-1">Sky Coins</span>
                         </div>
                     </div>

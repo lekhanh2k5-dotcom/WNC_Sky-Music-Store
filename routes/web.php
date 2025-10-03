@@ -1,43 +1,33 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 
 Route::group([], function () {
-    Route::get('/', fn () => view('page.home.index'))->name('home');
+    Route::get('/', fn() => view('page.home.index'))->name('home');
 
-    // Community routes
     Route::prefix('community')->name('community.')->group(function () {
-        Route::get('/', fn () => view('page.community.index'))->name('index');
-        Route::get('/post/{id}', fn ($id) => view('page.community.post-detail'))->name('post-detail');
+        Route::get('/', fn() => view('page.community.index'))->name('index');
+        Route::get('/post/{id}', fn($id) => view('page.community.post-detail'))->name('post-detail');
     });
-    // Shop routes
     Route::prefix('shop')->name('shop.')->group(function () {
-        Route::get('/', fn () => view('page.shop.index'))->name('index');
-        Route::get('/cart', fn () => view('page.shop.cart'))->name('cart');
+        Route::get('/', fn() => view('page.shop.index'))->name('index');
+        Route::get('/cart', fn() => view('page.shop.cart'))->name('cart');
     });
-    Route::get('/support', fn () => view('page.support.index'))->name('support.index');
+    Route::get('/support', fn() => view('page.support.index'))->name('support.index');
 });
 
-    // Auth routes
 Route::group([], function () {
-    Route::get('/login', fn () => view('auth.login'))->name('login');
-        Route::post('/login', function () {
-            // Xử lý đăng nhập ở đây (placeholder)
-            return redirect()->route('home');
-        })->name('login.submit');
-        Route::get('/register', fn () => view('auth.register'))->name('register');
-        Route::post('/register', function () {
-            // Xử lý đăng ký ở đây (placeholder)
-            return redirect()->route('home');
-        })->name('register.submit');
-        Route::get('/forgot-password', fn () => view('auth.forgot-password'))->name('forgot-password');
-        Route::post('/forgot-password', function () {
-            // Xử lý gửi email quên mật khẩu ở đây (placeholder)
-            return redirect()->route('login');
-        })->name('password.email');
-        Route::get('/reset-password', fn () => view('auth.reset-password'))->name('reset-password');
-    });
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('forgot-password');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
+    Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('reset-password');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
 
 Route::get('/admin', function () {
     return redirect()->route('admin.dashboard');
@@ -54,9 +44,7 @@ Route::prefix('admin')->group(function () {
         return view('admin.products.products');
     })->name('admin.products');
 
-    // Route trang sửa sheet nhạc
     Route::get('/products/edit/{id}', function ($id) {
-        // Trong thực tế sẽ lấy dữ liệu theo $id
         return view('admin.products.edit');
     })->name('admin.products.edit');
 
@@ -90,24 +78,18 @@ Route::prefix('admin')->group(function () {
     Route::get('/posts/edit/{id}', function ($id) {
         return view('admin.posts.edit');
     })->name('admin.posts.edit');
-    
-    Route::post('/logout', function () {
 
-        return redirect()->route('login');
-    })->name('logout');
+    // Admin logout 
+    Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 });
 
-// Account section
-Route::prefix('account')->group(function () {
+Route::prefix('account')->middleware('auth')->group(function () {
     Route::get('/', function () {
-        return view('account.index');
-    })->name('account.index');
+        return view('account.sheets');
+    })->name('account.sheets');
     Route::get('/profile', function () {
         return view('account.profile');
     })->name('account.profile');
-    Route::get('/sheets', function () {
-        return view('account.sheets');
-    })->name('account.sheets');
     Route::get('/posts', function () {
         return view('account.posts');
     })->name('account.posts');
@@ -117,11 +99,9 @@ Route::prefix('account')->group(function () {
     Route::get('/settings', function () {
         return view('account.settings');
     })->name('account.settings');
-    // Nạp coin (Deposit) page
     Route::get('/deposit', function () {
         return view('account.deposit');
     })->name('account.deposit');
-    // Rút coin (Withdraw) page
     Route::get('/withdraw', function () {
         return view('account.withdraw');
     })->name('account.withdraw');

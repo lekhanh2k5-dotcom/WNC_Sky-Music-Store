@@ -71,10 +71,12 @@
                         <button class="admin-card px-4 py-2 rounded-lg text-white inter hover:bg-white hover:bg-opacity-20">
                             🔔 Thông báo
                         </button>
-                        <a href="{{ route('logout') }}" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-white inter">
-                            Đăng Xuất
-                        </a>
-
+                        <form action="{{ route('admin.logout') }}" method="POST" style="display: inline;">
+                            @csrf
+                            <button type="submit" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-white inter">
+                                Đăng Xuất
+                            </button>
+                        </form>
                     </div>
                 </div>
             </header>

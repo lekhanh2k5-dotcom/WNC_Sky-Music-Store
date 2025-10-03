@@ -14,159 +14,57 @@
             <a href="{{ url('/support') }}" class="nav-link text-white hover:text-yellow-300 transition-colors {{ request()->is('support') ? 'active' : '' }}">Hỗ Trợ</a>
         </div>
         
-        <!-- Kiểm tra trạng thái đăng nhập với Firebase -->
         <div id="auth-section">
-            <!-- Hiển thị khi đã đăng nhập (ẩn mặc định) -->
-            <div id="logged-in-section" class="hidden flex items-center space-x-4">
-                <!-- Hiển thị ảnh đại diện -->
-                <a href="/account" class="flex items-center space-x-2">
-                    <img id="user-avatar" src="/img/default-avatar.svg" alt="Avatar" class="w-10 h-10 rounded-full border-2 border-white">
-                    <span id="user-name" class="text-white">User</span>
-                </a>
-
-                <!-- Hiển thị số xu và giỏ hàng trên trang Shop -->
-                @if(request()->is('shop*'))
-                    <span id="user-coins" class="text-yellow-300 font-bold">Xu: 0</span>
-                    <a href="/shop/cart" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg hover:bg-opacity-30 transition-all">
-                        🛒 Giỏ Hàng
+            @auth
+                <!-- Hiển thị khi đã đăng nhập -->
+                <div class="flex items-center space-x-4">
+                    <!-- Hiển thị thông tin user -->
+                    <a href="{{ route('account.sheets') }}" class="flex items-center space-x-2 hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-lg transition-all">
+                        <img src="{{ asset('img/default-avatar.svg') }}" 
+                             alt="Avatar {{ Auth::user()->name }}" 
+                             class="w-10 h-10 rounded-full border-2 border-white border-opacity-50 object-cover shadow-lg"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-white border-opacity-50 shadow-lg" style="display: none;">
+                            <span class="text-white text-sm font-bold">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-white inter text-sm font-medium">{{ Auth::user()->name }}</span>
+                            <span class="text-blue-200 inter text-xs">Xem tài khoản</span>
+                        </div>
                     </a>
-                @endif
 
-                <!-- Nút Đăng Xuất -->
-                <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all">
-                    Đăng Xuất
-                </button>
-            </div>
+                    <!-- Hiển thị admin panel nếu là admin -->
+                    @if(Auth::user()->is_admin)
+                        <a href="{{ url('/admin') }}" class="bg-purple-500 bg-opacity-80 text-white px-4 py-2 rounded-lg hover:bg-opacity-100 transition-all inter">
+                            👑 Admin
+                        </a>
+                    @endif
 
-            <!-- Hiển thị khi chưa đăng nhập (hiển thị mặc định) -->
-            <div id="logged-out-section">
-                <a href="{{ route('login') }}" class="bg-white bg-opacity-20 text-white px-6 py-2 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">
-                    Đăng Nhập
-                </a>
-            </div>
+                    <!-- Hiển thị số xu và giỏ hàng trên trang Shop -->
+                    @if(request()->is('shop*'))
+                        <span class="text-yellow-300 font-bold inter">💰 Xu: 0</span>
+                        <a href="/shop/cart" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg hover:bg-opacity-30 transition-all inter">
+                            🛒 
+                        </a>
+                    @endif
+
+                    <!-- Form Đăng Xuất -->
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all inter">
+                            Đăng Xuất
+                        </button>
+                    </form>
+                </div>
+            @else
+                <!-- Hiển thị khi chưa đăng nhập -->
+                <div class="flex items-center space-x-4">
+                 
+                    <a href="{{ route('login') }}" class="bg-white bg-opacity-20 text-white px-6 py-2 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">
+                        Đăng Nhập
+                    </a>
+                </div>
+            @endauth
         </div>
     </div>
 </nav>
-
-<script type="module">
-    try {
-        // Import Firebase auth từ config file
-        const { auth } = await import('/js/firebase-config.js');
-        const { onAuthStateChanged, signOut } = await import('https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js');
-
-        console.log('Firebase modules loaded successfully');
-
-        // Kiểm tra trạng thái đăng nhập
-        onAuthStateChanged(auth, (user) => {
-            console.log('Auth state changed:', user ? 'logged in' : 'logged out');
-            
-            const loggedInSection = document.getElementById('logged-in-section');
-            const loggedOutSection = document.getElementById('logged-out-section');
-            
-            if (!loggedInSection || !loggedOutSection) {
-                console.error('Auth sections not found in DOM');
-                return;
-            }
-            
-            if (user) {
-                // Người dùng đã đăng nhập
-                console.log('User logged in:', user.email);
-                
-                // Ẩn nút đăng nhập
-                loggedOutSection.style.display = 'none';
-                loggedOutSection.classList.add('hidden');
-                
-                // Hiển thị section đã đăng nhập
-                loggedInSection.style.display = 'flex';
-                loggedInSection.classList.remove('hidden');
-                loggedInSection.classList.add('flex');
-                
-                // Cập nhật thông tin user
-                const userNameEl = document.getElementById('user-name');
-                const userAvatarEl = document.getElementById('user-avatar');
-                
-                if (userNameEl) {
-                    userNameEl.textContent = user.displayName || user.email.split('@')[0];
-                }
-                if (userAvatarEl) {
-                    userAvatarEl.src = user.photoURL || '/img/default-avatar.png';
-                }
-                
-                // Lấy thông tin coins từ Firestore nếu cần
-                // fetchUserCoins(user.uid);
-                
-            } else {
-                // Người dùng chưa đăng nhập
-                console.log('User logged out');
-                
-                // Ẩn section đã đăng nhập
-                loggedInSection.style.display = 'none';
-                loggedInSection.classList.add('hidden');
-                loggedInSection.classList.remove('flex');
-                
-                // Hiển thị nút đăng nhập
-                loggedOutSection.style.display = 'block';
-                loggedOutSection.classList.remove('hidden');
-            }
-        });
-
-        // Xử lý đăng xuất - đợi DOM load xong
-        document.addEventListener('DOMContentLoaded', () => {
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    try {
-                        console.log('Logging out...');
-                        await signOut(auth);
-                        console.log('Logged out successfully');
-                        // Không cần redirect vì onAuthStateChanged sẽ tự động update UI
-                    } catch (error) {
-                        console.error('Lỗi đăng xuất:', error);
-                        alert('Có lỗi khi đăng xuất. Vui lòng thử lại.');
-                    }
-                });
-            }
-        });
-
-        // Nếu DOM đã load rồi thì gán event ngay
-        if (document.readyState === 'loading') {
-            // DOM chưa load xong
-        } else {
-            // DOM đã load xong
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    try {
-                        console.log('Logging out...');
-                        await signOut(auth);
-                        console.log('Logged out successfully');
-                    } catch (error) {
-                        console.error('Lỗi đăng xuất:', error);
-                        alert('Có lỗi khi đăng xuất. Vui lòng thử lại.');
-                    }
-                });
-            }
-        }
-
-    } catch (error) {
-        console.error('Firebase initialization error:', error);
-        
-        // Fallback: hiển thị nút đăng nhập nếu Firebase lỗi
-        const loggedOutSection = document.getElementById('logged-out-section');
-        const loggedInSection = document.getElementById('logged-in-section');
-        
-        if (loggedOutSection) {
-            loggedOutSection.style.display = 'block';
-            loggedOutSection.classList.remove('hidden');
-        }
-        if (loggedInSection) {
-            loggedInSection.style.display = 'none';
-            loggedInSection.classList.add('hidden');
-        }
-        
-        // Hiển thị thông báo lỗi cho dev
-        console.error('Vui lòng kiểm tra cấu hình Firebase trong /js/firebase-config.js');
-    }
-</script>
