@@ -62,7 +62,7 @@
                 </div>
             </div>
             <div class="flex justify-end gap-3 mt-8">
-                <a href="{{ route('admin.products') }}" class="px-6 py-2 rounded-full font-semibold shadow transition bg-gradient-to-r from-gray-200 to-gray-400 text-gray-800 hover:from-gray-300 hover:to-gray-500 border border-gray-300">Hủy</a>
+                <a href="{{ route('admin.products.index') }}" class="px-6 py-2 rounded-full font-semibold shadow transition bg-gradient-to-r from-gray-200 to-gray-400 text-gray-800 hover:from-gray-300 hover:to-gray-500 border border-gray-300">Hủy</a>
                 <button type="submit" class="px-6 py-2 rounded-full font-semibold shadow transition bg-gradient-to-r from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 border border-blue-600">Lưu thay đổi</button>
             </div>
         </form>

@@ -46,7 +46,7 @@
             <nav class="flex-1">
                 <ul class="space-y-2">
                     <li><a href="{{ route('admin.dashboard') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">📊 Dashboard</a></li>
-                    <li><a href="{{ route('admin.products') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">🎼 Sheet Nhạc</a></li>
+                    <li><a href="{{ route('admin.products.index') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">🎼 Sheet Nhạc</a></li>
                     <li><a href="{{ route('admin.orders') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">🛒 Đơn Hàng</a></li>
                     <li><a href="{{ route('admin.users') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">👥 Người Dùng</a></li>
                     <li><a href="{{ route('admin.posts') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">📝 Bài Viết</a></li>

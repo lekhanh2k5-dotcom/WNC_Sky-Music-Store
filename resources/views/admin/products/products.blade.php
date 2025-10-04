@@ -10,10 +10,17 @@
                 <div class="admin-card rounded-xl p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="orbitron text-2xl font-bold text-white">Bản Nhạc</h3>
-                        <button class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-lg text-white inter font-semibold">
+                        <a href="{{ route('admin.products.create') }}" class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-lg text-white inter font-semibold">
                             + Thêm Sheet Mới
-                        </button>
+                        </a>
                     </div>
+
+                    <!-- Success Message -->
+                    @if(session('success'))
+                        <div class="bg-green-500 bg-opacity-20 border border-green-500 rounded-lg p-4 mb-6">
+                            <p class="text-green-300 font-semibold">✅ {{ session('success') }}</p>
+                        </div>
+                    @endif
 
                     <!-- Filters -->
                     <div class="flex flex-wrap gap-4 mb-6">
@@ -47,6 +54,7 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @forelse($products as $product)
                                 <tr class="table-row">
                                     <td class="py-4">
                                         <div class="flex items-center space-x-3">
@@ -54,47 +62,34 @@
                                                 <span class="text-xl">🎵</span>
                                             </div>
                                             <div>
-                                                <p class="text-white font-semibold inter">Dreams of Light</p>
-                                                <p class="text-blue-200 text-sm inter">Nguyễn Văn A</p>
+                                                <p class="text-white font-semibold inter">{{ $product->name }}</p>
+                                                <p class="text-blue-200 text-sm inter">{{ $product->author }}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-4 text-white inter">SkyMusicLover</td>
-                                    <td class="py-4 text-white inter">Season</td>
-                                    <td class="py-4 text-white inter">50.000đ</td>
-                                    <td class="py-4 text-white inter">234</td>
-                                    <td class="py-4"><span class="status-badge status-active">Đang bán</span></td>
+                                    <td class="py-4 text-white inter">{{ $product->transcribed_by }}</td>
+                                    <td class="py-4 text-white inter">{{ $product->country_region }}</td>
+                                    <td class="py-4 text-white inter">{{ number_format($product->price) }}đ</td>
+                                    <td class="py-4 text-white inter">{{ $product->downloads_count }}</td>
+                                    <td class="py-4">
+                                        <span class="status-badge {{ $product->is_active ? 'status-active' : 'status-inactive' }}">
+                                            {{ $product->is_active ? 'Đang bán' : 'Ngừng bán' }}
+                                        </span>
+                                    </td>
                                     <td class="py-4">
                                         <div class="flex space-x-2">
-                                            <a href="{{ route('admin.products.edit', 1) }}" class="bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-white text-sm">Sửa</a>
+                                            <a href="{{ route('admin.products.edit', $product->id) }}" class="bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-white text-sm">Sửa</a>
                                             <button class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm">Xóa</button>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr class="table-row">
-                                    <td class="py-4">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
-                                                <span class="text-xl">🎶</span>
-                                            </div>
-                                            <div>
-                                                <p class="text-white font-semibold inter">Aurora Concert</p>
-                                                <p class="text-blue-200 text-sm inter">Yamada Taro</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 text-white inter">AuroraVN</td>
-                                    <td class="py-4 text-white inter">Season</td>
-                                    <td class="py-4 text-white inter">75.000đ</td>
-                                    <td class="py-4 text-white inter">189</td>
-                                    <td class="py-4"><span class="status-badge status-active">Đang bán</span></td>
-                                    <td class="py-4">
-                                        <div class="flex space-x-2">
-                                            <a href="{{ route('admin.products.edit', 2) }}" class="bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-white text-sm">Sửa</a>
-                                            <button class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm">Xóa</button>
-                                        </div>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="py-8 text-center text-gray-400">
+                                        Chưa có bản nhạc nào
                                     </td>
                                 </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

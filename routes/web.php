@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 
 
 Route::group([], function () {
@@ -40,9 +41,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
         return view('admin.dashboard.dashboard');
     })->name('admin.dashboard');
 
-    Route::get('/products', function () {
-        return view('admin.products.products');
-    })->name('admin.products');
+    Route::get('/products', [ProductController::class, 'index'])->name('admin.products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('admin.products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('admin.products.store');
+    Route::post('/products/preview', [ProductController::class, 'previewFile'])->name('admin.products.preview');
 
     Route::get('/products/edit/{id}', function ($id) {
         return view('admin.products.edit');
