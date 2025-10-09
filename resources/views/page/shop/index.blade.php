@@ -25,73 +25,34 @@
 
                 <!-- Products Grid -->
                 <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Product 1 -->
-                    <div class="game-card rounded-xl p-4">
-                        <div class="bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg mb-4 flex items-center justify-center" style="aspect-ratio: 16/9; width: 100%;">
-                            <span class="text-3xl">🎵</span>
+                    @foreach($products as $product)
+                        <div class="game-card rounded-xl p-4">
+                            <div class="bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg mb-4 flex items-center justify-center" style="aspect-ratio: 16/9; width: 100%;">
+                                @if($product->image_path)
+                                    <img src="{{ asset($product->image_path) }}" alt="{{ $product->name }}" class="object-cover w-full h-full rounded-lg" />
+                                @else
+                                    <span class="text-3xl">🎵</span>
+                                @endif
+                            </div>
+                            <h4 class="orbitron font-bold text-white mb-2">{{ $product->name }}</h4>
+                            <p class="inter text-blue-200 text-sm mb-1">Tác giả: {{ $product->author }}</p>
+                            <p class="inter text-blue-200 text-sm mb-1">Người soạn: {{ $product->transcribed_by }}</p>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="orbitron text-yellow-300 font-bold">{{ number_format($product->price, 0, ',', '.') }}đ</span>
+                                <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
+                                    @click="product = {
+                                        name: '{{ $product->name }}',
+                                        author: '{{ $product->author }}',
+                                        composer: '{{ $product->transcribed_by }}',
+                                        price: '{{ number_format($product->price, 0, ',', '.') }}đ',
+                                        img: '{{ $product->image_path ? asset($product->image_path) : '' }}',
+                                        video: '{{ $product->youtube_demo_url ? (Str::contains($product->youtube_demo_url, 'youtu.be') ? Str::replace('youtu.be/', 'www.youtube.com/embed/', $product->youtube_demo_url) : Str::replace('watch?v=', 'embed/', $product->youtube_demo_url)) : '' }}'
+                                    }; showDetail = true;">
+                                    Xem
+                                </button>
+                            </div>
                         </div>
-                        <h4 class="orbitron font-bold text-white mb-2">Dreams of Light</h4>
-                        <p class="inter text-blue-200 text-sm mb-1">Tác giả: Nguyễn Văn A</p>
-                        <p class="inter text-blue-200 text-sm mb-1">Người soạn: SkyMusicLover</p>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="orbitron text-yellow-300 font-bold">50.000đ</span>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
-                                @click="product = { name: 'Dreams of Light', author: 'Nguyễn Văn A', composer: 'SkyMusicLover', price: '50.000đ', img: 'https://via.placeholder.com/320x180?text=Dreams+of+Light', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }; showDetail = true;">
-                                Xem
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Product 2 -->
-                    <div class="game-card rounded-xl p-4">
-                        <div class="bg-gradient-to-br from-pink-400 to-red-500 rounded-lg mb-4 flex items-center justify-center" style="aspect-ratio: 16/9; width: 100%;">
-                            <span class="text-3xl">🎶</span>
-                        </div>
-                        <h4 class="orbitron font-bold text-white mb-2">Aurora Concert</h4>
-                        <p class="inter text-blue-200 text-sm mb-1">Tác giả: Yamada Taro</p>
-                        <p class="inter text-blue-200 text-sm mb-1">Người soạn: AuroraVN</p>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="orbitron text-yellow-300 font-bold">75.000đ</span>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
-                                @click="product = { name: 'Aurora Concert', author: 'Yamada Taro', composer: 'AuroraVN', price: '75.000đ', img: 'https://via.placeholder.com/320x180?text=Aurora+Concert', video: 'https://www.youtube.com/embed/vd2WseQnruc' }; showDetail = true;">
-                                Xem
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Product 3 -->
-                    <div class="game-card rounded-xl p-4">
-                        <div class="bg-gradient-to-br from-green-400 to-blue-500 rounded-lg mb-4 flex items-center justify-center" style="aspect-ratio: 16/9; width: 100%;">
-                            <span class="text-3xl">🎼</span>
-                        </div>
-                        <h4 class="orbitron font-bold text-white mb-2">Forest Theme</h4>
-                        <p class="inter text-blue-200 text-sm mb-1">Tác giả: Lê Văn B</p>
-                        <p class="inter text-blue-200 text-sm mb-1">Người soạn: ForestMaster</p>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="orbitron text-yellow-300 font-bold">30.000đ</span>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
-                                @click="product = { name: 'Forest Theme', author: 'Lê Văn B', composer: 'ForestMaster', price: '30.000đ', img: 'https://via.placeholder.com/320x180?text=Forest+Theme', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }; showDetail = true;">
-                                Xem
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Product 4 -->
-                    <div class="game-card rounded-xl p-4">
-                        <div class="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg mb-4 flex items-center justify-center" style="aspect-ratio: 16/9; width: 100%;">
-                            <span class="text-3xl">🎹</span>
-                        </div>
-                        <h4 class="orbitron font-bold text-white mb-2">Valley Race</h4>
-                        <p class="inter text-blue-200 text-sm mb-1">Tác giả: Trần Văn C</p>
-                        <p class="inter text-blue-200 text-sm mb-1">Người soạn: ValleyKing</p>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="orbitron text-yellow-300 font-bold">40.000đ</span>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
-                                @click="product = { name: 'Valley Race', author: 'Trần Văn C', composer: 'ValleyKing', price: '40.000đ', img: 'https://via.placeholder.com/320x180?text=Valley+Race', video: 'https://youtu.be/483FtCW_3po?si=zfDmr03D2ny2L-qE' }; showDetail = true;">
-                                Xem
-                            </button>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </section>

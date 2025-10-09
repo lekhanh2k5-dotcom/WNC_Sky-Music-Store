@@ -22,6 +22,13 @@
                         </div>
                     @endif
 
+                    <!-- Error Message -->
+                    @if(session('error'))
+                        <div class="bg-red-500 bg-opacity-20 border border-red-500 rounded-lg p-4 mb-6">
+                            <p class="text-red-300 font-semibold">❌ {{ session('error') }}</p>
+                        </div>
+                    @endif
+
                     <!-- Filters -->
                     <div class="flex flex-wrap gap-4 mb-6">
                         <!-- Custom Dropdown Danh Mục -->
@@ -79,7 +86,7 @@
                                     <td class="py-4">
                                         <div class="flex space-x-2">
                                             <a href="{{ route('admin.products.edit', $product->id) }}" class="bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-white text-sm">Sửa</a>
-                                            <button class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm">Xóa</button>
+                                            <button onclick="confirmDelete({{ $product->id }}, '{{ addslashes($product->name) }}')" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm">Xóa</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -95,6 +102,70 @@
                     </div>
                 </div>
             </div>
+
+<!-- Modal xác nhận xóa -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4 border border-white border-opacity-20">
+        <div class="text-center">
+            <div class="mx-auto w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-4">
+                <span class="text-2xl">⚠️</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Xác nhận xóa</h3>
+            <p class="text-gray-300 mb-6">
+                Bạn có chắc chắn muốn xóa bản nhạc 
+                <strong id="deleteSongName" class="text-blue-300"></strong>?
+            </p>
+            <p class="text-red-300 text-sm mb-6">
+                ⚠️ Hành động này không thể hoàn tác!
+            </p>
+            
+            <div class="flex space-x-4">
+                <button onclick="closeDeleteModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-lg text-white font-semibold">
+                    Hủy bỏ
+                </button>
+                <button onclick="executeDelete()" class="flex-1 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-white font-semibold">
+                    Xóa ngay
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form ẩn để gửi DELETE request -->
+<form id="deleteForm" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+<script>
+let deleteProductId = null;
+
+function confirmDelete(productId, productName) {
+    deleteProductId = productId;
+    document.getElementById('deleteSongName').textContent = productName;
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+    deleteProductId = null;
+}
+
+function executeDelete() {
+    if (deleteProductId) {
+        const form = document.getElementById('deleteForm');
+        form.action = `/admin/products/${deleteProductId}`;
+        form.submit();
+    }
+}
+
+// Đóng modal khi click bên ngoài
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+</script>
 
 @endsection
 

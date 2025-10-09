@@ -282,7 +282,8 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+        return view('admin.products.edit', compact('product'));
     }
 
     /**
@@ -290,7 +291,85 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $product = Product::findOrFail($id);
+
+            $request->validate([
+                'music_file' => 'nullable|file|mimes:txt,json|max:2048',
+                'name' => 'required|string|max:255',
+                'author' => 'nullable|string|max:255',
+                'transcribed_by' => 'nullable|string|max:255',
+                'country_region' => 'required|string|max:100',
+                'price' => 'required|numeric|min:0',
+                'youtube_url' => 'nullable|url',
+                'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'is_active' => 'nullable|boolean'
+            ]);
+
+            // Xử lý upload file mới (nếu có)
+            if ($request->hasFile('music_file')) {
+                // Xóa file cũ
+                if ($product->file_path && file_exists(public_path($product->file_path))) {
+                    unlink(public_path($product->file_path));
+                }
+
+                $file = $request->file('music_file');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+
+                // Tạo thư mục theo quốc gia
+                $countryFolder = $this->getCountryFolder($request->input('country_region'));
+                $uploadPath = 'songs/' . $countryFolder;
+                if (!is_dir(public_path($uploadPath))) {
+                    mkdir(public_path($uploadPath), 0755, true);
+                }
+
+                // Lưu file nhạc
+                $file->move(public_path($uploadPath), $fileName);
+                $product->file_path = $uploadPath . '/' . $fileName;
+            }
+
+            // Xử lý upload ảnh mới (nếu có)
+            if ($request->hasFile('cover_image')) {
+                // Xóa ảnh cũ
+                if ($product->image_path && file_exists(public_path($product->image_path))) {
+                    unlink(public_path($product->image_path));
+                }
+
+                $imageFile = $request->file('cover_image');
+                $imageName = time() . '_cover_' . $imageFile->getClientOriginalName();
+
+                // Tạo thư mục cho ảnh
+                $countryFolder = $this->getCountryFolder($request->input('country_region'));
+                $imageUploadPath = 'images/covers/' . $countryFolder;
+                if (!is_dir(public_path($imageUploadPath))) {
+                    mkdir(public_path($imageUploadPath), 0755, true);
+                }
+
+                // Lưu ảnh
+                $imageFile->move(public_path($imageUploadPath), $imageName);
+                $product->image_path = $imageUploadPath . '/' . $imageName;
+            }
+
+            // Cập nhật thông tin sản phẩm
+            $product->update([
+                'name' => $request->input('name'),
+                'author' => $request->input('author') ?: 'Chưa xác định',
+                'transcribed_by' => $request->input('transcribed_by') ?: 'Admin',
+                'country_region' => $request->input('country_region'),
+                'price' => $request->input('price'),
+                'youtube_demo_url' => $request->input('youtube_url'),
+                'is_active' => $request->boolean('is_active', false)
+            ]);
+
+            return redirect()->route('admin.products.index')
+                ->with('success', 'Đã cập nhật bản nhạc "' . $product->name . '" thành công!');
+        } catch (\Exception $e) {
+            Log::error('Update product error: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Có lỗi xảy ra khi cập nhật bản nhạc. Vui lòng thử lại.');
+        }
     }
 
     /**
@@ -298,7 +377,30 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $product = Product::findOrFail($id);
+
+            // Xóa file nhạc nếu tồn tại
+            if ($product->file_path && file_exists(public_path($product->file_path))) {
+                unlink(public_path($product->file_path));
+            }
+
+            // Xóa ảnh cover nếu tồn tại
+            if ($product->image_path && file_exists(public_path($product->image_path))) {
+                unlink(public_path($product->image_path));
+            }
+
+            // Xóa bản ghi trong database
+            $product->delete();
+
+            return redirect()->route('admin.products.index')
+                ->with('success', 'Đã xóa bản nhạc "' . $product->name . '" thành công!');
+        } catch (\Exception $e) {
+            Log::error('Delete product error: ' . $e->getMessage());
+
+            return redirect()->route('admin.products.index')
+                ->with('error', 'Có lỗi xảy ra khi xóa bản nhạc. Vui lòng thử lại.');
+        }
     }
 
     /**

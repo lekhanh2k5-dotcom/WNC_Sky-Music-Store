@@ -13,7 +13,10 @@ Route::group([], function () {
         Route::get('/post/{id}', fn($id) => view('page.community.post-detail'))->name('post-detail');
     });
     Route::prefix('shop')->name('shop.')->group(function () {
-        Route::get('/', fn() => view('page.shop.index'))->name('index');
+        Route::get('/', function () {
+            $products = \App\Models\Product::where('is_active', 1)->orderBy('created_at', 'desc')->get();
+            return view('page.shop.index', compact('products'));
+        })->name('index');
         Route::get('/cart', fn() => view('page.shop.cart'))->name('cart');
     });
     Route::get('/support', fn() => view('page.support.index'))->name('support.index');
@@ -45,10 +48,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/products/create', [ProductController::class, 'create'])->name('admin.products.create');
     Route::post('/products', [ProductController::class, 'store'])->name('admin.products.store');
     Route::post('/products/preview', [ProductController::class, 'previewFile'])->name('admin.products.preview');
+    Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('admin.products.edit');
+    Route::put('/products/{id}', [ProductController::class, 'update'])->name('admin.products.update');
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('admin.products.destroy');
 
-    Route::get('/products/edit/{id}', function ($id) {
-        return view('admin.products.edit');
-    })->name('admin.products.edit');
+
 
     Route::get('/orders', function () {
         return view('admin.orders.orders');
