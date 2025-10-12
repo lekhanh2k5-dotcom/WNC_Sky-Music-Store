@@ -1,9 +1,52 @@
 @extends('layouts.app')
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+@endpush
+
 @section('content')
-<div class="max-w-6xl mx-auto px-2 py-10">
+<div class="max-w-6xl mx-auto px-2 py-10" x-data="{
+    async removeFromCart(productId) {
+        if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('{{ route('cart.remove') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Có lỗi xảy ra');
+        }
+    }
+}">
     <div class="game-card rounded-2xl p-8">
         <h2 class="text-center text-3xl md:text-4xl font-bold mb-2 text-white">GIỎ HÀNG CỦA BẠN</h2>
-        <div class="text-center text-white/80 mb-8">Có 1 sản phẩm trong giỏ hàng</div>
+        <div class="text-center text-white/80 mb-8">
+            @if($cartCount > 0)
+                Có {{ $cartCount }} bản nhạc trong giỏ hàng
+            @else
+                Giỏ hàng trống
+            @endif
+        </div>
+        
+        @if(count($cart) > 0)
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Cart Table -->
             <div class="flex-1 bg-white/10 backdrop-blur-2xl rounded-2xl shadow-2xl p-6 overflow-x-auto border border-white/30 text-white">
@@ -17,51 +60,75 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @foreach($cart as $item)
                     <tr class="border-b border-gray-100 hover:bg-white/30 transition">
                         <td class="py-4 px-2 align-top w-44">
                             <div class="aspect-w-16 aspect-h-9 w-full rounded-lg overflow-hidden border border-gray-200">
-                                <img src="/img/sheet1.jpg" alt="Dreams of Light" class="object-cover w-full h-full">
+                                @if($item['image_path'])
+                                    <img src="{{ asset($item['image_path']) }}" alt="{{ $item['name'] }}" class="object-cover w-full h-full">
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                                        <span class="text-3xl">🎵</span>
+                                    </div>
+                                @endif
                             </div>
                         </td>
                         <td class="py-4 px-2 align-top">
-                            <div class="font-semibold text-white text-lg">Dreams of Light</div>
-                            <div class="text-white/80 text-sm">Tác giả: SkyMusicLover</div>
-                            <div class="text-white/60 text-sm mb-1">Người soạn: AuroraVN</div>
-                            <a href="#" class="text-cyan-300 text-sm underline hover:text-cyan-100">Xem lại</a>
+                            <div class="font-semibold text-white text-lg">{{ $item['name'] }}</div>
+                            <div class="text-white/80 text-sm">Tác giả: {{ $item['author'] }}</div>
+                            <div class="text-white/60 text-sm mb-1">Người soạn: {{ $item['transcribed_by'] }}</div>
+                            @if($item['youtube_demo_url'])
+                                <a href="{{ $item['youtube_demo_url'] }}" target="_blank" class="text-cyan-300 text-sm underline hover:text-cyan-100">Xem demo</a>
+                            @endif
                         </td>
                         <td class="py-4 px-2 align-top text-right">
-                            <span class="font-bold text-lg text-yellow-300">1,855,000đ</span>
+                            <span class="font-bold text-lg text-yellow-300">{{ number_format($item['price'], 0, ',', '.') }}đ</span>
                         </td>
                         <td class="py-4 px-2 align-top text-right">
-                            <button class="text-blue-400 hover:text-blue-600 text-2xl transition align-top" title="Xóa sản phẩm">&times;</button>
+                            <button @click="removeFromCart({{ $item['id'] }})" 
+                                    class="text-red-400 hover:text-red-600 text-2xl transition align-top" 
+                                    title="Xóa sản phẩm">&times;</button>
                         </td>
                     </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
             <!-- Order Summary -->
             <div class="w-full md:w-80 bg-white/10 backdrop-blur-2xl rounded-2xl shadow-2xl p-6 flex flex-col gap-4 border border-white/30 text-white">
-            <div class="font-semibold text-lg text-white mb-2">Tóm tắt đơn hàng</div>
-            <div class="flex justify-between text-white/80 text-base">
-                <span>Tổng tiền hàng:</span>
-                <span>1,855,000đ</span>
+                <div class="font-semibold text-lg text-white mb-2">Tóm tắt đơn hàng</div>
+                <div class="flex justify-between text-white/80 text-base">
+                    <span>Tổng tiền hàng:</span>
+                    <span>{{ number_format($total, 0, ',', '.') }}đ</span>
+                </div>
+                <div class="flex justify-between text-white/80 text-base">
+                    <span>Giảm giá:</span>
+                    <span>- 0đ</span>
+                </div>
+                <div class="flex justify-between text-white/80 text-base pb-2 border-b border-white/30">
+                    <span>Tạm tính:</span>
+                    <span>{{ number_format($total, 0, ',', '.') }}đ</span>
+                </div>
+                <div class="flex justify-between items-center text-xl font-bold text-yellow-300 mt-2">
+                    <span>Tổng tiền:</span>
+                    <span>{{ number_format($total, 0, ',', '.') }}đ</span>
+                </div>
+                <button class="w-full mt-4 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold text-lg shadow hover:from-blue-600 hover:to-cyan-500 transition">TIẾN HÀNH ĐẶT HÀNG</button>
+                <a href="{{ route('shop.index') }}" class="w-full py-3 rounded-lg border border-white/20 text-white font-semibold text-lg text-center hover:bg-white/10 transition">MUA THÊM SẢN PHẨM</a>
             </div>
-            <div class="flex justify-between text-white/80 text-base">
-                <span>Giảm giá:</span>
-                <span>- 0đ</span>
-            </div>
-            <div class="flex justify-between text-white/80 text-base pb-2 border-b border-white/30">
-                <span>Tạm tính:</span>
-                <span>1,855,000đ</span>
-            </div>
-            <div class="flex justify-between items-center text-xl font-bold text-yellow-300 mt-2">
-                <span>Tổng tiền:</span>
-                <span>1,855,000đ</span>
-            </div>
-            <button class="w-full mt-4 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold text-lg shadow hover:from-blue-600 hover:to-cyan-500 transition">TIẾN HÀNH ĐẶT HÀNG</button>
-            <a href="{{ route('shop.index') }}" class="w-full py-3 rounded-lg border border-blue-200 text-blue-700 font-semibold text-lg text-center hover:bg-blue-50 transition">MUA THÊM SẢN PHẨM</a>
         </div>
+        @else
+        <!-- Empty Cart -->
+        <div class="text-center py-16">
+            <div class="text-6xl mb-4">🛒</div>
+            <h3 class="text-2xl font-bold text-white mb-4">Giỏ hàng của bạn đang trống</h3>
+            <p class="text-white/80 mb-8">Hãy thêm một số sheet nhạc vào giỏ hàng để tiếp tục!</p>
+            <a href="{{ route('shop.index') }}" 
+               class="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold text-lg rounded-lg shadow hover:from-blue-600 hover:to-cyan-500 transition">
+                KHÁM PHÁ SẢN PHẨM
+            </a>
+        </div>
+        @endif
     </div>
 </div>
-    </div>
 @endsection

@@ -17,7 +17,13 @@ Route::group([], function () {
             $products = \App\Models\Product::where('is_active', 1)->orderBy('created_at', 'desc')->paginate(12);
             return view('page.shop.index', compact('products'));
         })->name('index');
-        Route::get('/cart', fn() => view('page.shop.cart'))->name('cart');
+        Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart');
+    });
+
+    // Cart routes
+    Route::prefix('cart')->name('cart.')->group(function () {
+        Route::post('/add', [App\Http\Controllers\CartController::class, 'add'])->name('add');
+        Route::post('/remove', [App\Http\Controllers\CartController::class, 'remove'])->name('remove');
     });
     Route::get('/support', fn() => view('page.support.index'))->name('support.index');
 });

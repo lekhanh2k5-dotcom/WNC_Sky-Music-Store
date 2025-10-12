@@ -17,7 +17,36 @@
 @section('title', 'Cửa hàng - Sky Music Store')
 
 @section('content')
- <div id="shop" class="page-content" x-data="{ showDetail: false, product: {} }">
+ <div id="shop" class="page-content" x-data="{
+        showDetail: false, 
+        product: {},
+        async addToCart(productId) {
+            try {
+                const response = await fetch('{{ route('cart.add') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    this.showDetail = false;
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng');
+            }
+        }
+    }">
         <section class="relative z-10 py-20 px-6">
             <div class="max-w-6xl mx-auto">
                 <h2 class="orbitron text-5xl font-bold text-white text-center mb-16">🎼 Cửa Hàng Sheet Nhạc</h2>
@@ -50,10 +79,12 @@
                                 <span class="orbitron text-yellow-300 font-bold">{{ number_format($product->price, 0, ',', '.') }}đ</span>
                                 <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
                                     @click="product = {
+                                        id: {{ $product->id }},
                                         name: '{{ $product->name }}',
                                         author: '{{ $product->author }}',
                                         composer: '{{ $product->transcribed_by }}',
                                         price: '{{ number_format($product->price, 0, ',', '.') }}đ',
+                                        rawPrice: {{ $product->price }},
                                         img: '{{ $product->image_path ? asset($product->image_path) : '' }}',
                                         video: '{{ $product->youtube_demo_url ? (Str::contains($product->youtube_demo_url, 'youtu.be') ? Str::replace('youtu.be/', 'www.youtube.com/embed/', $product->youtube_demo_url) : Str::replace('watch?v=', 'embed/', $product->youtube_demo_url)) : '' }}'
                                     }; showDetail = true;">
@@ -88,7 +119,10 @@
                         <p class="inter text-gray-700 text-base">Tác giả: <span class="font-semibold" x-text="product.author"></span></p>
                         <p class="inter text-gray-700 text-base">Người soạn: <span class="font-semibold" x-text="product.composer"></span></p>
                         <p class="orbitron text-blue-600 text-xl font-bold">Giá: <span x-text="product.price"></span></p>
-                        <button class="bg-blue-500 text-white px-5 py-2 rounded-lg font-semibold shadow hover:bg-blue-600 transition w-fit mt-2">Thêm vào giỏ hàng</button>
+                        <button @click="addToCart(product.id)" 
+                                class="bg-blue-500 text-white px-5 py-2 rounded-lg font-semibold shadow hover:bg-blue-600 transition w-fit mt-2">
+                            Thêm vào giỏ hàng
+                        </button>
                     </div>
                 </div>
                 <div class="mt-4">
