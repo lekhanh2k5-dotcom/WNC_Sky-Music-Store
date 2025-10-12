@@ -2,7 +2,16 @@
 @extends('layouts.app')
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-<style>[x-cloak] { display: none !important; }</style>
+<style>
+    [x-cloak] { display: none !important; }
+    /* Ẩn dòng "Showing x to y of z results" trong pagination */
+    nav[role="navigation"] p {
+        display: none !important;
+    }
+    .pagination-wrapper p {
+        display: none !important;
+    }
+</style>
 @endpush
 
 @section('title', 'Cửa hàng - Sky Music Store')
@@ -54,6 +63,14 @@
                         </div>
                     @endforeach
                 </div>
+                
+                <!-- Pagination -->
+                <div class="mt-8 flex justify-center">
+                    <div class="pagination-wrapper">
+                        {{ $products->links() }}
+                    </div>
+                </div>
+                
             </div>
         </section>
     <!-- Popup chi tiết sản phẩm -->

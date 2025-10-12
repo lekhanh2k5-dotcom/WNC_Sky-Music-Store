@@ -14,7 +14,7 @@ Route::group([], function () {
     });
     Route::prefix('shop')->name('shop.')->group(function () {
         Route::get('/', function () {
-            $products = \App\Models\Product::where('is_active', 1)->orderBy('created_at', 'desc')->get();
+            $products = \App\Models\Product::where('is_active', 1)->orderBy('created_at', 'desc')->paginate(12);
             return view('page.shop.index', compact('products'));
         })->name('index');
         Route::get('/cart', fn() => view('page.shop.cart'))->name('cart');

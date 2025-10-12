@@ -13,7 +13,7 @@ class ProductController extends Controller
     public function index()
     {
         return view('admin.products.products', [
-            'products' => Product::orderBy('created_at', 'desc')->paginate(10)
+            'products' => Product::orderBy('created_at', 'desc')->get()
         ]);
     }
 
