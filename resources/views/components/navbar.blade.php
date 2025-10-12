@@ -41,12 +41,12 @@
                     @endif
 
                     <!-- Hiển thị số xu và giỏ hàng trên trang Shop -->
-                    @if(request()->is('shop*'))
-                        <span class="text-yellow-300 font-bold inter">💰 Xu: 0</span>
-                        <a href="/shop/cart" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg hover:bg-opacity-30 transition-all inter">
-                            🛒 
-                        </a>
-                    @endif
+                        @if(request()->is('shop*'))
+                            <span class="text-yellow-300 font-bold inter">💰 Xu: {{ Auth::user()->coins ?? 0 }}</span>
+                            <a href="/shop/cart" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg hover:bg-opacity-30 transition-all inter">
+                                🛒 
+                            </a>
+                        @endif
 
                     <!-- Form Đăng Xuất -->
                     <form action="{{ route('logout') }}" method="POST" style="display: inline;">

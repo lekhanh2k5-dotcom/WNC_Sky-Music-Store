@@ -221,7 +221,7 @@
                         </p>
                         <div class="flex items-center gap-3 mt-2">
                             <span class="coin-spin text-4xl drop-shadow-lg">🪙</span>
-                            <span class="orbitron text-3xl font-extrabold text-yellow-300 drop-shadow">0</span>
+                                <span class="orbitron text-3xl font-extrabold text-yellow-300 drop-shadow">{{ Auth::user()->coins ?? 0 }}</span>
                             <span class="inter text-base text-yellow-100 tracking-wide ml-1">Sky Coins</span>
                         </div>
                     </div>

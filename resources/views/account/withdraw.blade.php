@@ -4,7 +4,7 @@
     <div class="flex flex-col items-center mb-8">
         <span class="text-5xl coin-spin mb-2">🪙</span>
         <h2 class="orbitron text-3xl font-bold text-white mb-1">Rút Sky Coins</h2>
-        <div class="text-yellow-200 text-lg mb-2">Số dư hiện tại: <span class="font-bold">2,450</span> coins</div>
+    <div class="text-yellow-200 text-lg mb-2">Số dư hiện tại: <span class="font-bold">{{ Auth::user()->coins ?? 0 }}</span> coins</div>
     </div>
     <div class="profile-card rounded-3xl p-8 shadow-2xl bg-white/30 border border-white/20 backdrop-blur-lg">
         <form class="space-y-6">
