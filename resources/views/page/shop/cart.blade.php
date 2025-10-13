@@ -34,6 +34,33 @@
             console.error('Error:', error);
             alert('❌ Có lỗi xảy ra');
         }
+    },
+    async checkout() {
+        if (!confirm('Bạn có chắc chắn muốn thanh toán bằng xu?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('{{ route('cart.checkout') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('✅ ' + data.message);
+                location.reload();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Có lỗi xảy ra trong quá trình thanh toán');
+        }
     }
 }">
     <div class="game-card rounded-2xl p-8">
@@ -97,23 +124,59 @@
             <!-- Order Summary -->
             <div class="w-full md:w-80 bg-white/10 backdrop-blur-2xl rounded-2xl shadow-2xl p-6 flex flex-col gap-4 border border-white/30 text-white">
                 <div class="font-semibold text-lg text-white mb-2">Tóm tắt đơn hàng</div>
+                
+                @auth
+                <div class="flex justify-between text-white/80 text-base mb-2">
+                    <span>Số xu hiện có:</span>
+                    <span class="text-yellow-300 font-bold">🪙 {{ number_format(auth()->user()->coins ?? 0, 0, ',', '.') }}</span>
+                </div>
+                @endauth
+                
                 <div class="flex justify-between text-white/80 text-base">
-                    <span>Tổng tiền hàng:</span>
-                    <span>{{ number_format($total, 0, ',', '.') }}đ</span>
+                    <span>Tổng xu cần:</span>
+                    <span class="text-red-300">🪙 {{ number_format($total, 0, ',', '.') }}</span>
                 </div>
-                <div class="flex justify-between text-white/80 text-base">
-                    <span>Giảm giá:</span>
-                    <span>- 0đ</span>
+                
+                @auth
+                @if((auth()->user()->coins ?? 0) >= $total)
+                    <div class="text-center text-green-300 text-sm">
+                        ✅ Đủ xu để thanh toán
+                    </div>
+                @else
+                    <div class="text-center text-red-300 text-sm">
+                        ❌ Không đủ xu (thiếu {{ number_format($total - (auth()->user()->coins ?? 0), 0, ',', '.') }} xu)
+                    </div>
+                @endif
+                @endauth
+                
+                <div class="flex justify-between items-center text-xl font-bold text-yellow-300 mt-2 pt-2 border-t border-white/30">
+                    <span>Tổng cộng:</span>
+                    <span>🪙 {{ number_format($total, 0, ',', '.') }}</span>
                 </div>
-                <div class="flex justify-between text-white/80 text-base pb-2 border-b border-white/30">
-                    <span>Tạm tính:</span>
-                    <span>{{ number_format($total, 0, ',', '.') }}đ</span>
-                </div>
-                <div class="flex justify-between items-center text-xl font-bold text-yellow-300 mt-2">
-                    <span>Tổng tiền:</span>
-                    <span>{{ number_format($total, 0, ',', '.') }}đ</span>
-                </div>
-                <button class="w-full mt-4 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold text-lg shadow hover:from-blue-600 hover:to-cyan-500 transition">TIẾN HÀNH ĐẶT HÀNG</button>
+                
+                @auth
+                    @if((auth()->user()->coins ?? 0) >= $total)
+                        <button @click="checkout()" 
+                                class="w-full mt-4 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-400 text-white font-bold text-lg shadow hover:from-green-600 hover:to-emerald-500 transition">
+                            🪙 MUA
+                        </button>
+                    @else
+                        <button disabled 
+                                class="w-full mt-4 py-3 rounded-lg bg-gray-500 text-white font-bold text-lg shadow cursor-not-allowed opacity-50">
+                            Không đủ xu
+                        </button>
+                        <a href="{{ route('account.deposit') }}" 
+                           class="w-full py-3 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-400 text-white font-bold text-lg text-center shadow hover:from-yellow-600 hover:to-orange-500 transition">
+                            💰 NẠP THÊM XU
+                        </a>
+                    @endif
+                @else
+                    <a href="{{ route('login') }}" 
+                       class="w-full mt-4 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold text-lg text-center shadow hover:from-blue-600 hover:to-cyan-500 transition">
+                        ĐĂNG NHẬP ĐỂ THANH TOÁN
+                    </a>
+                @endauth
+                
                 <a href="{{ route('shop.index') }}" class="w-full py-3 rounded-lg border border-white/20 text-white font-semibold text-lg text-center hover:bg-white/10 transition">MUA THÊM SẢN PHẨM</a>
             </div>
         </div>

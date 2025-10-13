@@ -24,6 +24,7 @@ Route::group([], function () {
     Route::prefix('cart')->name('cart.')->group(function () {
         Route::post('/add', [App\Http\Controllers\CartController::class, 'add'])->name('add');
         Route::post('/remove', [App\Http\Controllers\CartController::class, 'remove'])->name('remove');
+        Route::post('/checkout', [App\Http\Controllers\CartController::class, 'checkout'])->name('checkout');
     });
     Route::get('/support', fn() => view('page.support.index'))->name('support.index');
 });
@@ -96,18 +97,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 });
 
 Route::prefix('account')->middleware('auth')->group(function () {
-    Route::get('/', function () {
-        return view('account.sheets');
-    })->name('account.sheets');
+    Route::get('/', [App\Http\Controllers\AccountController::class, 'sheets'])->name('account.sheets');
     Route::get('/profile', function () {
         return view('account.profile');
     })->name('account.profile');
     Route::get('/posts', function () {
         return view('account.posts');
     })->name('account.posts');
-    Route::get('/activity', function () {
-        return view('account.activity');
-    })->name('account.activity');
+    Route::get('/activity', [App\Http\Controllers\AccountController::class, 'activity'])->name('account.activity');
     Route::get('/settings', function () {
         return view('account.settings');
     })->name('account.settings');
@@ -117,4 +114,5 @@ Route::prefix('account')->middleware('auth')->group(function () {
     Route::get('/withdraw', function () {
         return view('account.withdraw');
     })->name('account.withdraw');
+    Route::get('/download/{purchaseId}', [App\Http\Controllers\AccountController::class, 'downloadSheet'])->name('account.download');
 });

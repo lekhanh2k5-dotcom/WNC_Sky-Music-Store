@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
@@ -21,7 +25,10 @@ class CartController extends Controller
             $total += $item['price'];
         }
 
-        return view('page.shop.cart', compact('cart', 'total', 'cartCount'));
+        $user = Auth::user();
+        $userCoins = $user ? $user->coins : 0;
+
+        return view('page.shop.cart', compact('cart', 'total', 'cartCount', 'userCoins'));
     }
 
     /**
@@ -41,7 +48,6 @@ class CartController extends Controller
 
         $cart = session()->get('cart', []);
 
-        // Đảm bảo productId là string để so sánh key trong session
         $productKey = (string) $productId;
 
         // Nếu sản phẩm đã có trong giỏ hàng, không thêm nữa
@@ -90,7 +96,6 @@ class CartController extends Controller
         $productId = $request->input('product_id');
         $cart = session()->get('cart', []);
 
-        // Đảm bảo productId là string để so sánh key trong session
         $productKey = (string) $productId;
 
         if (isset($cart[$productKey])) {
@@ -110,5 +115,90 @@ class CartController extends Controller
             'success' => false,
             'message' => 'Sản phẩm không tồn tại trong giỏ hàng'
         ]);
+    }
+
+    /**
+     * Thanh toán giỏ hàng bằng xu
+     */
+    public function checkout(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn cần đăng nhập để thanh toán'
+            ]);
+        }
+
+        $cart = session('cart', []);
+
+        if (empty($cart)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Giỏ hàng trống'
+            ]);
+        }
+
+        $user = Auth::user();
+        $totalCoins = 0;
+
+        // Tính tổng xu cần thiết
+        foreach ($cart as $item) {
+            $totalCoins += $item['price'];
+        }
+
+        // Kiểm tra số xu đủ không
+        if ($user->coins < $totalCoins) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Số xu không đủ. Bạn cần ' . number_format($totalCoins, 0, ',', '.') . ' xu nhưng chỉ có ' . number_format($user->coins, 0, ',', '.') . ' xu'
+            ]);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Trừ xu của user
+            User::where('id', $user->id)->decrement('coins', $totalCoins);
+
+            // Lưu lịch sử mua hàng cho từng sản phẩm
+            foreach ($cart as $item) {
+                // Kiểm tra xem đã mua sản phẩm này chưa
+                $existingPurchase = Purchase::where('user_id', $user->id)
+                    ->where('product_id', $item['id'])
+                    ->where('status', 'completed')
+                    ->first();
+
+                if (!$existingPurchase) {
+                    Purchase::create([
+                        'user_id' => $user->id,
+                        'product_id' => $item['id'],
+                        'coins_spent' => $item['price'],
+                        'status' => 'completed'
+                    ]);
+                }
+            }
+
+            // Xóa giỏ hàng
+            session()->forget('cart');
+
+            DB::commit();
+
+            // Lấy lại user để có coins mới nhất
+            $updatedUser = User::find($user->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Thanh toán thành công! Bạn đã mua ' . count($cart) . ' bản nhạc.',
+                'remaining_coins' => $updatedUser->coins
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Checkout error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra trong quá trình thanh toán'
+            ]);
+        }
     }
 }

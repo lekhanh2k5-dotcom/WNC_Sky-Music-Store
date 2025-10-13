@@ -16,6 +16,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'coins', // Số xu trong tài khoản
     ];
 
     protected $hidden = [
@@ -27,4 +28,12 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Relationship với Purchase
+     */
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class);
+    }
 }

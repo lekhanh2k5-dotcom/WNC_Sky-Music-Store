@@ -9,3 +9,25 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Custom Pagination Styles */
+.pagination {
+    @apply flex justify-center items-center space-x-2 mt-6;
+}
+
+.pagination a,
+.pagination span {
+    @apply px-3 py-2 text-sm rounded-lg transition-colors duration-200;
+}
+
+.pagination a {
+    @apply bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white;
+}
+
+.pagination .active span {
+    @apply bg-blue-600 text-white;
+}
+
+.pagination .disabled span {
+    @apply bg-gray-900 text-gray-600 cursor-not-allowed;
+}
