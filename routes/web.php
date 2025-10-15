@@ -36,7 +36,9 @@ Route::group([], function () {
     Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
     Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('forgot-password');
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
-    Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('reset-password');
+    // Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('reset-password');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
