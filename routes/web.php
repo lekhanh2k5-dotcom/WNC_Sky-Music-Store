@@ -10,7 +10,6 @@ Route::group([], function () {
 
     Route::prefix('community')->name('community.')->group(function () {
         Route::get('/', fn() => view('page.community.index'))->name('index');
-        Route::get('/post/{id}', fn($id) => view('page.community.post-detail'))->name('post-detail');
     });
     Route::prefix('shop')->name('shop.')->group(function () {
         Route::get('/', function () {
@@ -47,9 +46,7 @@ Route::get('/admin', function () {
 
 
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard.dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::get('/products', [ProductController::class, 'index'])->name('admin.products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('admin.products.create');
@@ -61,36 +58,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
 
 
-    Route::get('/orders', function () {
-        return view('admin.orders.orders');
-    })->name('admin.orders');
+    Route::get('/orders', [App\Http\Controllers\OrderController::class, 'index'])->name('admin.orders');
+    Route::get('/orders/{id}', [App\Http\Controllers\OrderController::class, 'show'])->name('admin.orders.show');
+    Route::post('/orders/{id}/status', [App\Http\Controllers\OrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
 
-    Route::get('/users', function () {
-        return view('admin.users.users');
-    })->name('admin.users');
-
-    Route::get('/analytics', function () {
-        return view('admin.analytics.analytics');
-    })->name('admin.analytics');
+    Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('admin.users');
+    Route::post('/users/{id}/toggle-status', [App\Http\Controllers\UserController::class, 'toggleStatus'])->name('admin.users.toggleStatus');
+    Route::delete('/users/{id}', [App\Http\Controllers\UserController::class, 'destroy'])->name('admin.users.destroy');
 
     Route::get('/settings', function () {
         return view('admin.settings.settings');
     })->name('admin.settings');
-
-    Route::get('/posts', function () {
-        return view('admin.posts.posts');
-    })->name('admin.posts');
-
-    Route::get('/posts/create', function () {
-        return view('admin.posts.create');
-    })->name('admin.posts.create');
-    Route::post('/posts/create', function () {
-        return redirect()->route('admin.posts');
-    })->name('admin.posts.store');
-
-    Route::get('/posts/edit/{id}', function ($id) {
-        return view('admin.posts.edit');
-    })->name('admin.posts.edit');
 
     // Admin logout 
     Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');

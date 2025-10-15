@@ -49,10 +49,7 @@
                     <li><a href="{{ route('admin.products.index') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">🎼 Sheet Nhạc</a></li>
                     <li><a href="{{ route('admin.orders') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">🛒 Đơn Hàng</a></li>
                     <li><a href="{{ route('admin.users') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">👥 Người Dùng</a></li>
-                        <li><a href="{{ url('/') }}" target="_blank" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-yellow-400 inter flex items-center space-x-3">🌐 Giao diện khách</a></li>
-                    <li><a href="{{ route('admin.posts') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">📝 Bài Viết</a></li>
-                    <li><a href="{{ route('admin.analytics') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">📈 Thống Kê</a></li>
-                    <li><a href="{{ route('admin.settings') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">⚙️ Cài Đặt</a></li>
+                    <li><a href="{{ route('admin.settings') }}" class="sidebar-link w-full text-left px-4 py-3 rounded-lg text-white inter flex items-center space-x-3">ℹ️ Thông Tin</a></li>
 
                 </ul>
             </nav>
@@ -85,5 +82,6 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    @stack('scripts')
 </body>
 </html>
