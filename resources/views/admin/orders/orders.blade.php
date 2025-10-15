@@ -34,36 +34,56 @@
                             <th class="text-left py-3 text-gray-300 inter">ID Đơn</th>
                             <th class="text-left py-3 text-gray-300 inter">Khách Hàng</th>
                             <th class="text-left py-3 text-gray-300 inter">Sản Phẩm</th>
-                            <th class="text-left py-3 text-gray-300 inter">Tổng Tiền</th>
-                            <th class="text-left py-3 text-gray-300 inter">Ngày Đặt</th>
+                            <th class="text-left py-3 text-gray-300 inter">Số Xu</th>
+                            <th class="text-left py-3 text-gray-300 inter">Ngày Mua</th>
                             <th class="text-left py-3 text-gray-300 inter">Trạng Thái</th>
-                            <th class="text-left py-3 text-gray-300 inter">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="table-row">
-                            <td class="py-4 text-white inter font-mono">#ORD-1234</td>
-                            <td class="py-4">
-                                <div>
-                                    <p class="text-white inter">Nguyễn Văn A</p>
-                                    <p class="text-gray-300 text-sm inter">nguyenvana@email.com</p>
-                                </div>
-                            </td>
-                            <td class="py-4 text-white inter">
-                                <div class="flex flex-col gap-1">
-                                    <span class="inline-block bg-blue-600 bg-opacity-20 text-blue-200 px-3 py-1 rounded-full text-sm">Dreams of Light</span>
-                                    <span class="inline-block bg-blue-600 bg-opacity-20 text-blue-200 px-3 py-1 rounded-full text-sm">Aurora Concert</span>
-                                </div>
-                            </td>
-                            <td class="py-4 text-white inter font-semibold">50.000đ</td>
-                            <td class="py-4 text-white inter">15/12/2024</td>
-                            <td class="py-4"><span class="status-badge status-active">Hoàn thành</span></td>
-                            <td class="py-4">
-                                <button class="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-white text-sm">Chi tiết</button>
-                            </td>
-                        </tr>
+                        @if($orders->count() > 0)
+                            @foreach($orders as $order)
+                                <tr class="table-row">
+                                    <td class="py-4 text-white inter font-mono">#{{ $order->id }}</td>
+                                    <td class="py-4">
+                                        <div>
+                                            <p class="text-white inter">{{ $order->user->name ?? 'N/A' }}</p>
+                                            <p class="text-gray-300 text-sm inter">{{ $order->user->email ?? 'N/A' }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-white inter">
+                                        <span class="inline-block bg-blue-600 bg-opacity-20 text-blue-200 px-3 py-1 rounded-full text-sm">
+                                            {{ $order->product->name ?? 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td class="py-4 text-white inter font-semibold">{{ number_format($order->coins_spent, 0, ',', '.') }} 🪙</td>
+                                    <td class="py-4 text-white inter">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                                    <td class="py-4">
+                                        @if($order->status == 'completed')
+                                            <span class="status-badge status-active">Hoàn thành</span>
+                                        @elseif($order->status == 'pending')
+                                            <span class="status-badge status-pending">Chờ xử lý</span>
+                                        @else
+                                            <span class="status-badge status-inactive">{{ $order->status }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-gray-300 inter">
+                                    Chưa có đơn hàng nào
+                                </td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
+                
+                <!-- Pagination -->
+                @if($orders->count() > 0)
+                    <div class="mt-6">
+                        {{ $orders->links() }}
+                    </div>
+                @endif
             </div>
         </div>
         <!-- Nạp xu -->

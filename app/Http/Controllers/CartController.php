@@ -46,6 +46,21 @@ class CartController extends Controller
             ]);
         }
 
+        // Kiểm tra nếu user đã đăng nhập và đã mua sản phẩm này
+        if (Auth::check()) {
+            $hasPurchased = Purchase::where('user_id', Auth::id())
+                ->where('product_id', $productId)
+                ->where('status', 'completed')
+                ->exists();
+
+            if ($hasPurchased) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn đã mua sản phẩm này rồi! Vui lòng kiểm tra trong trang "Tài Khoản" để tải về.'
+                ]);
+            }
+        }
+
         $cart = session()->get('cart', []);
 
         $productKey = (string) $productId;
@@ -118,7 +133,7 @@ class CartController extends Controller
     }
 
     /**
-     * Thanh toán giỏ hàng bằng xu
+     * Thanh toán 
      */
     public function checkout(Request $request)
     {
@@ -160,7 +175,7 @@ class CartController extends Controller
             // Trừ xu của user
             User::where('id', $user->id)->decrement('coins', $totalCoins);
 
-            // Lưu lịch sử mua hàng cho từng sản phẩm
+            // Lưu lịch sử 
             foreach ($cart as $item) {
                 // Kiểm tra xem đã mua sản phẩm này chưa
                 $existingPurchase = Purchase::where('user_id', $user->id)

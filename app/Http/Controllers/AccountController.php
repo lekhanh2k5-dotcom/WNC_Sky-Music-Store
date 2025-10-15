@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Purchase;
-use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
@@ -26,11 +24,6 @@ class AccountController extends Controller
             ->where('status', 'completed')
             ->orderBy('created_at', 'desc')
             ->get();
-
-        // Debug
-        \Log::info('User ID: ' . $user->id);
-        \Log::info('Purchases count: ' . $purchases->count());
-
         return view('account.sheets', compact('purchases'));
     }
 

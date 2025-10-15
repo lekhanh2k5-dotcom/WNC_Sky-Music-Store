@@ -13,99 +13,57 @@
                         <table class="w-full">
                             <thead>
                                 <tr class="border-b border-white border-opacity-20">
+                                    <th class="text-left py-3 text-gray-300 inter">ID</th>
                                     <th class="text-left py-3 text-gray-300 inter">Người Dùng</th>
                                     <th class="text-left py-3 text-gray-300 inter">Email</th>
+                                    <th class="text-left py-3 text-gray-300 inter">Số Xu</th>
                                     <th class="text-left py-3 text-gray-300 inter">Vai trò</th>
-                                    <th class="text-left py-3 text-gray-300 inter">Trạng Thái</th>
-                                    <th class="text-left py-3 text-gray-300 inter">Thao Tác</th>
+                                    <th class="text-left py-3 text-gray-300 inter">Ngày Đăng Ký</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="table-row">
-                                    <td class="py-4">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                                                <span class="text-white font-bold">N</span>
-                                            </div>
-                                            <div>
-                                                <p class="text-white font-semibold inter">Nguyễn Văn A</p>
-                                                <p class="text-gray-300 text-sm inter">Khách hàng VIP</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 text-white inter">nguyenvana@email.com</td>
-                                        <td class="py-4">
-                                            <span class="text-sm font-semibold text-white">Member</span>
+                                @if($users->count() > 0)
+                                    @foreach($users as $user)
+                                        <tr class="table-row">
+                                            <td class="py-4 text-white inter font-mono">#{{ $user->id }}</td>
+                                            <td class="py-4">
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="w-10 h-10 {{ $user->role == 'admin' ? 'bg-red-500' : 'bg-blue-500' }} rounded-full flex items-center justify-center">
+                                                        <span class="text-white font-bold">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-white font-semibold inter">{{ $user->name }}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 text-white inter">{{ $user->email }}</td>
+                                            <td class="py-4 text-white inter font-semibold">{{ number_format($user->coins ?? 0, 0, ',', '.') }} 🪙</td>
+                                            <td class="py-4">
+                                                @if($user->role == 'admin')
+                                                    <span class="inline-block bg-red-600 bg-opacity-20 text-red-300 px-3 py-1 rounded-full text-sm font-semibold">Admin</span>
+                                                @else
+                                                    <span class="inline-block bg-blue-600 bg-opacity-20 text-blue-300 px-3 py-1 rounded-full text-sm font-semibold">User</span>
+                                                @endif
+                                            </td>
+                                            <td class="py-4 text-white inter">{{ $user->created_at->format('d/m/Y') }}</td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="6" class="py-8 text-center text-gray-300 inter">
+                                            Chưa có người dùng nào
                                         </td>
-                                    <td class="py-4"><span class="status-badge status-active">Hoạt động</span></td>
-                                    <td class="py-4">
-                                        <button class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm">Khóa</button>
-                                    </td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td class="py-4">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                                                <span class="text-white font-bold">T</span>
-                                            </div>
-                                            <div>
-                                                <p class="text-white font-semibold inter">Trần Thị B</p>
-                                                <p class="text-gray-300 text-sm inter">Khách hàng thường</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 text-white inter">tranthib@email.com</td>
-                                        <td class="py-4">
-                                            <span class="text-sm font-semibold text-white">Seller</span>
-                                        </td>
-                                    <td class="py-4"><span class="status-badge status-active">Hoạt động</span></td>
-                                    <td class="py-4">
-                                            <div class="flex space-x-2">
-                                        <button class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm">Khóa</button>
-                                                <button class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white text-sm" style="display:none;">Làm người bán</button>
-                                            </div>
-                                    </td>
-                                </tr>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
-
-                    <!-- Role Change Requests Table -->
-                    <div class="mt-10">
-                        <h4 class="text-lg font-bold text-white mb-4">Yêu cầu đăng sheet</h4>
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead>
-                                    <tr class="border-b border-white border-opacity-20">
-                                        <th class="text-left py-3 text-gray-300 inter">Người Dùng</th>
-                                        <th class="text-left py-3 text-gray-300 inter">Email</th>
-                                        <th class="text-left py-3 text-gray-300 inter">Ngày Yêu Cầu</th>
-                                        <th class="text-left py-3 text-gray-300 inter">Thao Tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="table-row">
-                                        <td class="py-4">
-                                            <div class="flex items-center space-x-3">
-                                                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                                                    <span class="text-white font-bold">M</span>
-                                                </div>
-                                                <div>
-                                                    <p class="text-white font-semibold inter">Mai Văn C</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-4 text-white inter">maivanc@email.com</td>
-                                        <td class="py-4 text-white inter">10/09/2025</td>
-                                        <td class="py-4">
-                                            <div class="flex space-x-2">
-                                                <button class="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-white text-sm">Duyệt</button>
-                                                <button class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm">Từ chối</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        
+                        <!-- Pagination -->
+                        @if($users->count() > 0)
+                            <div class="mt-6">
+                                {{ $users->links() }}
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
