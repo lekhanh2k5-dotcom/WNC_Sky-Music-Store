@@ -1,136 +1,217 @@
-
 @extends('layouts.app')
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-<style>
-    [x-cloak] { display: none !important; }
-    /* Ẩn dòng "Showing x to y of z results" trong pagination */
-    nav[role="navigation"] p {
-        display: none !important;
-    }
-    .pagination-wrapper p {
-        display: none !important;
-    }
-</style>
-@endpush
 
-@section('title', 'Cửa hàng - Sky Music Store')
+@section('title', 'Shop - Sky Music Store')
 
 @section('content')
- <div id="shop" class="page-content" x-data="{
-        showDetail: false, 
-        product: {},
-        async addToCart(productId) {
-            try {
-                const response = await fetch('{{ route('cart.add') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        product_id: productId
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    alert('✅ ' + data.message);
-                    this.showDetail = false;
-                } else {
-                    alert('❌ ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng');
-            }
-        }
-    }">
-        <section class="relative z-10 py-20 px-6">
-            <div class="max-w-6xl mx-auto">
-                <h2 class="orbitron text-5xl font-bold text-white text-center mb-16">🎼 Cửa Hàng Sheet Nhạc</h2>
-                
-                <!-- Categories -->
-                <div class="flex flex-wrap justify-center gap-4 mb-12">
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Tất Cả</button>
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Việt Nam</button>
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Nhật Bản</button>
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Hàn Quốc</button>
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Trung Quốc</button>
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">US-UK</button>
+<div id="shop-page" class="page-content min-h-screen">
+    <section class="relative z-10 py-10 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Page Title -->
+            <h1 class="orbitron text-4xl md:text-5xl font-bold text-white text-center mb-8">
+                🎵 Cửa Hàng Sheet Nhạc
+            </h1>
+
+            <!-- Search & Filter Form -->
+            <form method="GET" action="{{ url('/shop') }}" class="mb-8">
+                <!-- Search Box -->
+                <div class="game-card rounded-xl p-6 mb-6 backdrop-blur-md">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        value="{{ request('search') }}"
+                        class="w-full p-4 rounded-lg bg-white bg-opacity-20 text-white placeholder-blue-200 border border-white border-opacity-30 focus:border-opacity-60 focus:outline-none transition text-lg" 
+                        placeholder="🔍 Tìm kiếm bài hát, tác giả...">
                 </div>
 
-                <!-- Products Grid -->
-                <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Country Filter Buttons -->
+                <div class="flex flex-wrap justify-center gap-4 mb-6">
+                    <button 
+                        type="submit" 
+                        name="country" 
+                        value="all"
+                        class="px-6 py-3 rounded-full font-semibold transition-all {{ !request('country') || request('country') == 'all' ? 'bg-gradient-to-r from-yellow-400 to-pink-500 text-white shadow-lg' : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30' }}">
+                        Tất Cả
+                    </button>
+
+                    @foreach($countries as $country)
+                        <button 
+                            type="submit" 
+                            name="country" 
+                            value="{{ $country }}"
+                            class="px-6 py-3 rounded-full font-semibold transition-all {{ request('country') == $country ? 'bg-gradient-to-r from-yellow-400 to-pink-500 text-white shadow-lg' : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30' }}">
+                            {{ $country }}
+                        </button>
+                    @endforeach
+                </div>
+
+                <!-- Price Range & Sort -->
+                <div class="game-card rounded-xl p-6 mb-6 backdrop-blur-md">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Price Min -->
+                        <input 
+                            type="number" 
+                            name="price_min" 
+                            value="{{ request('price_min') }}"
+                            step="0.01"
+                            class="p-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-blue-200 border border-white border-opacity-30 focus:border-opacity-60 focus:outline-none transition" 
+                            placeholder="💰 Giá từ ($)">
+
+                        <!-- Price Max -->
+                        <input 
+                            type="number" 
+                            name="price_max" 
+                            value="{{ request('price_max') }}"
+                            step="0.01"
+                            class="p-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-blue-200 border border-white border-opacity-30 focus:border-opacity-60 focus:outline-none transition" 
+                            placeholder="💰 Giá đến ($)">
+
+                        <!-- Sort -->
+                        <select 
+                            name="sort" 
+                            class="p-3 rounded-lg bg-white bg-opacity-20 text-white border border-white border-opacity-30 focus:border-opacity-60 focus:outline-none transition"
+                            onchange="this.form.submit()">
+                            <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>🆕 Mới nhất</option>
+                            <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>🔥 Phổ biến</option>
+                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>💲 Giá tăng</option>
+                            <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>💰 Giá giảm</option>
+                            <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>🔤 A-Z</option>
+                            <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>🔡 Z-A</option>
+                        </select>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex gap-4 mt-4">
+                        <button 
+                            type="submit" 
+                            class="flex-1 bg-gradient-to-r from-yellow-400 to-pink-500 text-white py-3 rounded-full font-bold hover:scale-105 transition-transform shadow-lg">
+                            🔍 Tìm kiếm
+                        </button>
+                        <a 
+                            href="{{ url('/shop') }}" 
+                            class="flex-1 bg-gray-500 bg-opacity-50 text-white py-3 rounded-full font-bold hover:scale-105 transition-transform text-center shadow-lg">
+                            🔄 Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Results Info -->
+            @if(request('search') || request('country') || request('price_min') || request('price_max'))
+                <div class="text-white mb-6 backdrop-blur-md bg-white bg-opacity-10 rounded-lg p-4">
+                    <p class="inter text-lg">
+                        Tìm thấy <strong class="text-yellow-400">{{ $products->total() }}</strong> bản nhạc
+                        
+                        @if(request('search'))
+                            cho từ khóa "<strong class="text-pink-400">{{ request('search') }}</strong>"
+                        @endif
+                        
+                        @if(request('country') && request('country') != 'all')
+                            từ <strong class="text-blue-300">{{ request('country') }}</strong>
+                        @endif
+
+                        @if(request('price_min') || request('price_max'))
+                            , giá từ 
+                            <strong class="text-yellow-300">
+                                ${{ request('price_min', '0') }} - ${{ request('price_max', '∞') }}
+                            </strong>
+                        @endif
+                    </p>
+                </div>
+            @endif
+
+            <!-- Products Grid -->
+            @if($products->count() > 0)
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     @foreach($products as $product)
-                        <div class="game-card rounded-xl p-4">
-                            <div class="bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg mb-4 flex items-center justify-center" style="aspect-ratio: 16/9; width: 100%;">
-                                @if($product->image_path)
-                                    <img src="{{ asset($product->image_path) }}" alt="{{ $product->name }}" class="object-cover w-full h-full rounded-lg" />
-                                @else
-                                    <span class="text-3xl">🎵</span>
-                                @endif
-                            </div>
-                            <h4 class="orbitron font-bold text-white mb-2">{{ $product->name }}</h4>
-                            <p class="inter text-blue-200 text-sm mb-1">Tác giả: {{ $product->author }}</p>
-                            <p class="inter text-blue-200 text-sm mb-1">Người soạn: {{ $product->transcribed_by }}</p>
-                            <div class="flex justify-between items-center mt-2">
-                                <span class="orbitron text-yellow-300 font-bold">{{ number_format($product->price, 0, ',', '.') }}đ</span>
-                                <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
-                                    @click="product = {
-                                        id: {{ $product->id }},
-                                        name: '{{ $product->name }}',
-                                        author: '{{ $product->author }}',
-                                        composer: '{{ $product->transcribed_by }}',
-                                        price: '{{ number_format($product->price, 0, ',', '.') }}đ',
-                                        rawPrice: {{ $product->price }},
-                                        img: '{{ $product->image_path ? asset($product->image_path) : '' }}',
-                                        video: '{{ $product->youtube_demo_url ? (Str::contains($product->youtube_demo_url, 'youtu.be') ? Str::replace('youtu.be/', 'www.youtube.com/embed/', $product->youtube_demo_url) : Str::replace('watch?v=', 'embed/', $product->youtube_demo_url)) : '' }}'
-                                    }; showDetail = true;">
-                                    Xem
-                                </button>
-                            </div>
+                        <div class="game-card rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-xl">
+                            <a href="{{ url('/shop/' . $product->id) }}">
+                                <!-- Product Image -->
+                                <div class="relative h-48 bg-gradient-to-br from-purple-900 to-blue-900">
+                                    @if($product->image_path)
+                                        <img 
+                                            src="{{ asset($product->image_path) }}" 
+                                            alt="{{ $product->name }}" 
+                                            class="w-full h-full object-cover">
+                                    @else
+                                        <div class="flex items-center justify-center h-full text-white text-6xl">
+                                            🎵
+                                        </div>
+                                    @endif
+
+                                    @if($product->downloads_count > 0)
+                                        <span class="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
+                                            ⬇️ {{ $product->downloads_count }}
+                                        </span>
+                                    @endif
+                                </div>
+                                
+                                <div class="p-4">
+                                    <h3 class="orbitron text-lg font-bold text-white mb-2 truncate" title="{{ $product->name }}">
+                                        {{ $product->name }}
+                                    </h3>
+                                    
+                                    <p class="inter text-sm text-blue-200 mb-1 truncate" title="{{ $product->author }}">
+                                        🎤 {{ $product->author }}
+                                    </p>
+                                    
+                                    <p class="inter text-xs text-blue-300 mb-3">
+                                        🌍 {{ $product->country_region }}
+                                    </p>
+                                    
+                                    <div class="flex justify-between items-center">
+                                        <span class="orbitron text-xl font-bold text-yellow-400">
+                                            ${{ number_format($product->price, 2) }}
+                                        </span>
+                                        
+                                        <button class="bg-gradient-to-r from-yellow-400 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:scale-105 transition-transform">
+                                            Xem
+                                        </button>
+                                    </div>
+                                </div>
+                            </a>
                         </div>
                     @endforeach
                 </div>
-                
+
                 <!-- Pagination -->
-                <div class="mt-8 flex justify-center">
-                    <div class="pagination-wrapper">
-                        {{ $products->links() }}
-                    </div>
+                <div class="mt-8">
+                    {{ $products->links() }}
                 </div>
-                
-            </div>
-        </section>
-    <!-- Popup chi tiết sản phẩm -->
-    <div x-show="showDetail" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 relative flex flex-col gap-4">
-                <button @click="showDetail=false" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
-                <div class="flex flex-col md:flex-row gap-6 items-center">
-                    <div class="w-full md:w-1/3">
-                        <div class="rounded-lg overflow-hidden" style="aspect-ratio: 16/9;">
-                            <img :src="product.img" alt="Ảnh đại diện" class="object-cover w-full h-full" />
-                        </div>
-                    </div>
-                    <div class="flex-1 flex flex-col gap-2">
-                        <h3 class="orbitron text-2xl font-bold text-gray-900" x-text="product.name"></h3>
-                        <p class="inter text-gray-700 text-base">Tác giả: <span class="font-semibold" x-text="product.author"></span></p>
-                        <p class="inter text-gray-700 text-base">Người soạn: <span class="font-semibold" x-text="product.composer"></span></p>
-                        <p class="orbitron text-blue-600 text-xl font-bold">Giá: <span x-text="product.price"></span></p>
-                        <button @click="addToCart(product.id)" 
-                                class="bg-blue-500 text-white px-5 py-2 rounded-lg font-semibold shadow hover:bg-blue-600 transition w-fit mt-2">
-                            Thêm vào giỏ hàng
-                        </button>
-                    </div>
+            @else
+                <!-- No Results -->
+                <div class="game-card rounded-xl p-12 text-center backdrop-blur-md">
+                    <div class="text-6xl mb-4">😢</div>
+                    <h3 class="orbitron text-2xl font-bold text-white mb-2">
+                        Không tìm thấy bản nhạc
+                    </h3>
+                    <p class="inter text-blue-200 mb-6">
+                        Thử thay đổi bộ lọc hoặc từ khóa khác
+                    </p>
+                    <a 
+                        href="{{ url('/shop') }}" 
+                        class="inline-block bg-gradient-to-r from-yellow-400 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:scale-105 transition-transform shadow-lg">
+                        Xem tất cả
+                    </a>
                 </div>
-                <div class="mt-4">
-                    <div style="position:relative;width:100%;aspect-ratio:16/9;">
-                        <iframe :src="product.video" style="position:absolute;top:0;left:0;width:100%;height:100%;" class="rounded-lg shadow" frameborder="0" allowfullscreen></iframe>
-                    </div>
-                </div>
-            </div>
+            @endif
         </div>
-    </div>
+    </section>
+</div>
+
+<style>
+    select option {
+        background-color: #1e1e2e;
+        color: white;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+</style>
 @endsection

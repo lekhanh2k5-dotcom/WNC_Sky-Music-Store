@@ -96,3 +96,7 @@ Route::prefix('account')->middleware('auth')->group(function () {
     })->name('account.withdraw');
     Route::get('/download/{purchaseId}', [App\Http\Controllers\AccountController::class, 'downloadSheet'])->name('account.download');
 });
+
+
+Route::get('/shop', [ProductController::class, 'index']);
+Route::get('/shop/{id}', [ProductController::class, 'show']);
