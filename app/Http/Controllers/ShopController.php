@@ -21,8 +21,20 @@ class ShopController extends Controller
             });
         }
 
+        // Lọc theo quốc gia
+        if ($request->filled('country')) {
+            $query->where('country_region', $request->country);
+        }
+
         $products = $query->orderBy('created_at', 'desc')->paginate(12);
 
-        return view('page.shop.index', compact('products'));
+        // Lấy danh sách các quốc gia có sản phẩm
+        $countries = Product::where('is_active', 1)
+            ->select('country_region')
+            ->distinct()
+            ->orderBy('country_region')
+            ->pluck('country_region');
+
+        return view('page.shop.index', compact('products', 'countries'));
     }
 }
