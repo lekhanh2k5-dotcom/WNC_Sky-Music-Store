@@ -12,10 +12,7 @@ Route::group([], function () {
         Route::get('/', fn() => view('page.community.index'))->name('index');
     });
     Route::prefix('shop')->name('shop.')->group(function () {
-        Route::get('/', function () {
-            $products = \App\Models\Product::where('is_active', 1)->orderBy('created_at', 'desc')->paginate(12);
-            return view('page.shop.index', compact('products'));
-        })->name('index');
+        Route::get('/', [App\Http\Controllers\ShopController::class, 'index'])->name('index');
         Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart');
     });
 
@@ -35,7 +32,6 @@ Route::group([], function () {
     Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
     Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('forgot-password');
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
-    // Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('reset-password');
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

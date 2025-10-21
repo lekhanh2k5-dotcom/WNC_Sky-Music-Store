@@ -12,9 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
-    /**
-     * Hiển thị trang giỏ hàng
-     */
+
     public function index()
     {
         $cart = session('cart', []);
@@ -46,7 +44,6 @@ class CartController extends Controller
             ]);
         }
 
-        // Kiểm tra nếu user đã đăng nhập và đã mua sản phẩm này
         if (Auth::check()) {
             $hasPurchased = Purchase::where('user_id', Auth::id())
                 ->where('product_id', $productId)
@@ -65,14 +62,12 @@ class CartController extends Controller
 
         $productKey = (string) $productId;
 
-        // Nếu sản phẩm đã có trong giỏ hàng, không thêm nữa
         if (isset($cart[$productKey])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Sản phẩm đã có trong giỏ hàng'
             ]);
         } else {
-            // Thêm sản phẩm mới vào giỏ hàng
             $cart[$productKey] = [
                 'id' => $product->id,
                 'name' => $product->name,
@@ -91,7 +86,6 @@ class CartController extends Controller
 
         session(['cart' => $cart]);
 
-        // Tính tổng số sản phẩm trong giỏ hàng (chỉ đếm số sản phẩm khác nhau)
         $cartCount = count($cart);
 
         Log::info('Cart updated:', ['cart' => $cart]);
@@ -103,9 +97,7 @@ class CartController extends Controller
         ]);
     }
 
-    /**
-     * Xóa sản phẩm khỏi giỏ hàng
-     */
+
     public function remove(Request $request)
     {
         $productId = $request->input('product_id');
@@ -156,12 +148,10 @@ class CartController extends Controller
         $user = Auth::user();
         $totalCoins = 0;
 
-        // Tính tổng xu cần thiết
         foreach ($cart as $item) {
             $totalCoins += $item['price'];
         }
 
-        // Kiểm tra số xu đủ không
         if ($user->coins < $totalCoins) {
             return response()->json([
                 'success' => false,
@@ -172,12 +162,9 @@ class CartController extends Controller
         try {
             DB::beginTransaction();
 
-            // Trừ xu của user
             User::where('id', $user->id)->decrement('coins', $totalCoins);
 
-            // Lưu lịch sử 
             foreach ($cart as $item) {
-                // Kiểm tra xem đã mua sản phẩm này chưa
                 $existingPurchase = Purchase::where('user_id', $user->id)
                     ->where('product_id', $item['id'])
                     ->where('status', 'completed')
@@ -193,12 +180,10 @@ class CartController extends Controller
                 }
             }
 
-            // Xóa giỏ hàng
             session()->forget('cart');
 
             DB::commit();
 
-            // Lấy lại user để có coins mới nhất
             $updatedUser = User::find($user->id);
 
             return response()->json([

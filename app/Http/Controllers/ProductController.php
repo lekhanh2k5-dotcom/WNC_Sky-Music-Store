@@ -11,8 +11,14 @@ class ProductController extends Controller
 
     public function index()
     {
+        $products = Product::withCount(['purchases' => function ($query) {
+            $query->where('status', 'completed');
+        }])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('admin.products.products', [
-            'products' => Product::orderBy('created_at', 'desc')->get()
+            'products' => $products
         ]);
     }
 
@@ -38,35 +44,29 @@ class ProductController extends Controller
         $file = $request->file('music_file');
         $fileName = time() . '_' . $file->getClientOriginalName();
 
-        // Tạo thư mục theo quốc gia
         $countryFolder = $this->getCountryFolder($request->input('country_region'));
         $uploadPath = 'songs/' . $countryFolder;
         if (!is_dir(public_path($uploadPath))) {
             mkdir(public_path($uploadPath), 0755, true);
         }
 
-        // Lưu file nhạc
         $file->move(public_path($uploadPath), $fileName);
         $filePath = $uploadPath . '/' . $fileName;
 
-        // Xử lý upload ảnh (nếu có)
         $imagePath = null;
         if ($request->hasFile('cover_image')) {
             $imageFile = $request->file('cover_image');
             $imageName = time() . '_cover_' . $imageFile->getClientOriginalName();
 
-            // Tạo thư mục cho ảnh
             $imageUploadPath = 'images/covers/' . $countryFolder;
             if (!is_dir(public_path($imageUploadPath))) {
                 mkdir(public_path($imageUploadPath), 0755, true);
             }
 
-            // Lưu ảnh
             $imageFile->move(public_path($imageUploadPath), $imageName);
             $imagePath = $imageUploadPath . '/' . $imageName;
         }
 
-        // Tạo sản phẩm mới với thông tin từ form
         Product::create([
             'name' => $request->input('name'),
             'author' => $request->input('author') ?: 'Chưa xác định',
@@ -84,9 +84,7 @@ class ProductController extends Controller
             ->with('success', 'Đã thêm bản nhạc mới thành công!');
     }
 
-    /**
-     * Get folder name based on country
-     */
+
     private function getCountryFolder($country)
     {
         $folders = [
@@ -103,23 +101,19 @@ class ProductController extends Controller
 
     private function parseFileInfo($content, $fileName)
     {
-        // Mặc định lấy tên từ filename
         $name = pathinfo($fileName, PATHINFO_FILENAME);
         $author = 'Chưa xác định';
         $transcribed_by = 'Admin';
 
-        // Làm sạch content và xử lý encoding
-        $cleanContent = $content; // Không trim ngay để giữ nguyên BOM
+        $cleanContent = $content;
 
         Log::info('Raw file analysis:', [
             'contentLength' => strlen($cleanContent),
             'firstBytes' => bin2hex(substr($cleanContent, 0, 10)),
             'fileName' => $fileName
         ]);
-
-        // Phát hiện và xử lý các loại BOM với thứ tự ưu tiên
         $boms = [
-            "\xFF\xFE\x00\x00" => 'UTF-32 LE BOM', // UTF-32 LE BOM (4 bytes) - check trước
+            "\xFF\xFE\x00\x00" => 'UTF-32 LE BOM', // UTF-32 LE BOM (4 bytes)
             "\x00\x00\xFE\xFF" => 'UTF-32 BE BOM', // UTF-32 BE BOM (4 bytes)
             "\xFF\xFE" => 'UTF-16 LE BOM',         // UTF-16 LE BOM (2 bytes)
             "\xFE\xFF" => 'UTF-16 BE BOM',         // UTF-16 BE BOM (2 bytes)
@@ -135,8 +129,6 @@ class ProductController extends Controller
                 break;
             }
         }
-
-        // Xử lý encoding với ưu tiên UTF-16 LE
         $originalEncoding = null;
 
         // Nếu có BOM UTF-16 LE hoặc detect được UTF-16 LE
@@ -159,13 +151,10 @@ class ProductController extends Controller
             }
         }
 
-        // Chuẩn hóa line endings (Unix LF -> Windows CRLF or vice versa)
         $cleanContent = str_replace(["\r\n", "\r"], "\n", $cleanContent); // Normalize to LF
 
-        // Làm sạch cuối cùng
         $cleanContent = trim($cleanContent);
 
-        // Xử lý các ký tự ẩn khác
         $cleanContent = preg_replace('/^[\x00-\x1F\x7F]+/', '', $cleanContent);
         $cleanContent = preg_replace('/[\x00-\x1F\x7F]+$/', '', $cleanContent);
         $cleanContent = trim($cleanContent);
@@ -173,14 +162,13 @@ class ProductController extends Controller
         Log::info('Attempting to parse file:', [
             'fileName' => $fileName,
             'contentLength' => strlen($cleanContent),
-            'contentStart' => substr($cleanContent, 0, 200), // Tăng lên 200 ký tự
-            'contentEnd' => substr($cleanContent, -50), // 50 ký tự cuối
-            'firstChar' => ord($cleanContent[0] ?? ''), // Mã ASCII ký tự đầu
-            'encoding' => mb_detect_encoding($cleanContent), // Detect encoding
-            'hasUTF8BOM' => substr($cleanContent, 0, 3) === "\xEF\xBB\xBF" // Check BOM
+            'contentStart' => substr($cleanContent, 0, 200),
+            'contentEnd' => substr($cleanContent, -50),
+            'firstChar' => ord($cleanContent[0] ?? ''),
+            'encoding' => mb_detect_encoding($cleanContent),
+            'hasUTF8BOM' => substr($cleanContent, 0, 3) === "\xEF\xBB\xBF"
         ]);
 
-        // Thử parse JSON trước (bất kể đuôi file)
         $jsonData = json_decode($cleanContent, true);
         $jsonError = json_last_error();
 
@@ -194,13 +182,10 @@ class ProductController extends Controller
         if ($jsonError === JSON_ERROR_NONE && is_array($jsonData)) {
             Log::info('JSON parsed successfully, extracting song data...');
 
-            // Xử lý cả JSON array và JSON object
             if (isset($jsonData[0]) && is_array($jsonData[0])) {
-                // Nếu là array of objects, lấy phần tử đầu tiên
                 $songData = $jsonData[0];
                 Log::info('Using first element of JSON array');
             } else {
-                // Nếu là object đơn lẻ hoặc array đơn giản
                 $songData = $jsonData;
                 Log::info('Using JSON data directly');
             }
@@ -212,7 +197,6 @@ class ProductController extends Controller
                 'transcribedBy' => $songData['transcribedBy'] ?? 'not found'
             ]);
 
-            // Lấy thông tin từ JSON
             if (isset($songData['name']) && !empty(trim($songData['name']))) {
                 $name = trim($songData['name']);
                 Log::info('Name extracted from JSON: ' . $name);
@@ -228,14 +212,12 @@ class ProductController extends Controller
                 Log::info('TranscribedBy extracted from JSON: ' . $transcribed_by);
             }
 
-            // Debug: Log kết quả cuối cùng
             Log::info('Final JSON Parse Result:', [
                 'name' => $name,
                 'author' => $author,
                 'transcribed_by' => $transcribed_by
             ]);
         } else {
-            // Nếu không phải JSON, parse như text thô (logic cũ)
             if (preg_match('/name[:\s]+(.*)/i', $content, $matches)) {
                 $name = trim($matches[1]);
             }
@@ -268,26 +250,13 @@ class ProductController extends Controller
         ];
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         $product = Product::findOrFail($id);
         return view('admin.products.edit', compact('product'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         try {
@@ -305,9 +274,7 @@ class ProductController extends Controller
                 'is_active' => 'nullable|boolean'
             ]);
 
-            // Xử lý upload file mới (nếu có)
             if ($request->hasFile('music_file')) {
-                // Xóa file cũ
                 if ($product->file_path && file_exists(public_path($product->file_path))) {
                     unlink(public_path($product->file_path));
                 }
@@ -315,21 +282,17 @@ class ProductController extends Controller
                 $file = $request->file('music_file');
                 $fileName = time() . '_' . $file->getClientOriginalName();
 
-                // Tạo thư mục theo quốc gia
                 $countryFolder = $this->getCountryFolder($request->input('country_region'));
                 $uploadPath = 'songs/' . $countryFolder;
                 if (!is_dir(public_path($uploadPath))) {
                     mkdir(public_path($uploadPath), 0755, true);
                 }
 
-                // Lưu file nhạc
                 $file->move(public_path($uploadPath), $fileName);
                 $product->file_path = $uploadPath . '/' . $fileName;
             }
 
-            // Xử lý upload ảnh mới (nếu có)
             if ($request->hasFile('cover_image')) {
-                // Xóa ảnh cũ
                 if ($product->image_path && file_exists(public_path($product->image_path))) {
                     unlink(public_path($product->image_path));
                 }
@@ -337,19 +300,16 @@ class ProductController extends Controller
                 $imageFile = $request->file('cover_image');
                 $imageName = time() . '_cover_' . $imageFile->getClientOriginalName();
 
-                // Tạo thư mục cho ảnh
                 $countryFolder = $this->getCountryFolder($request->input('country_region'));
                 $imageUploadPath = 'images/covers/' . $countryFolder;
                 if (!is_dir(public_path($imageUploadPath))) {
                     mkdir(public_path($imageUploadPath), 0755, true);
                 }
 
-                // Lưu ảnh
                 $imageFile->move(public_path($imageUploadPath), $imageName);
                 $product->image_path = $imageUploadPath . '/' . $imageName;
             }
 
-            // Cập nhật thông tin sản phẩm
             $product->update([
                 'name' => $request->input('name'),
                 'author' => $request->input('author') ?: 'Chưa xác định',
@@ -371,25 +331,20 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(string $id)
     {
         try {
             $product = Product::findOrFail($id);
 
-            // Xóa file nhạc nếu tồn tại
             if ($product->file_path && file_exists(public_path($product->file_path))) {
                 unlink(public_path($product->file_path));
             }
 
-            // Xóa ảnh cover nếu tồn tại
             if ($product->image_path && file_exists(public_path($product->image_path))) {
                 unlink(public_path($product->image_path));
             }
 
-            // Xóa bản ghi trong database
             $product->delete();
 
             return redirect()->route('admin.products.index')
@@ -402,9 +357,6 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * API endpoint để preview thông tin từ file upload
-     */
     public function previewFile(Request $request)
     {
         try {
@@ -416,7 +368,6 @@ class ProductController extends Controller
             $content = file_get_contents($file->getPathname());
             $fileName = $file->getClientOriginalName();
 
-            // Parse thông tin từ file
             $parsedInfo = $this->parseFileInfo($content, $fileName);
 
             return response()->json([
@@ -439,9 +390,6 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * Format file size to human readable
-     */
     private function formatFileSize($bytes)
     {
         if ($bytes >= 1048576) {

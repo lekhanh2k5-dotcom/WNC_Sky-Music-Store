@@ -77,7 +77,7 @@
                                     <td class="py-4 text-white inter">{{ $product->transcribed_by }}</td>
                                     <td class="py-4 text-white inter">{{ $product->country_region }}</td>
                                     <td class="py-4 text-white inter">{{ number_format($product->price) }}đ</td>
-                                    <td class="py-4 text-white inter">{{ $product->downloads_count }}</td>
+                                    <td class="py-4 text-white inter">{{ $product->purchases_count ?? 0 }}</td>
                                     <td class="py-4">
                                         <span class="status-badge {{ $product->is_active ? 'status-active' : 'status-inactive' }}">
                                             {{ $product->is_active ? 'Đang bán' : 'Ngừng bán' }}

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -103,8 +104,6 @@ class AuthController extends Controller
         return redirect('/');
     }
 
-    // ============= FORGOT PASSWORD FUNCTIONS =============
-
     public function showForgotPasswordForm()
     {
         return view('auth.forgot-password');
@@ -126,11 +125,9 @@ class AuthController extends Controller
                 ->withInput();
         }
 
-        // Tạo token reset password (64 ký tự ngẫu nhiên)
         $token = Str::random(64);
 
-        // Lưu token vào database
-        \DB::table('password_reset_tokens')->updateOrInsert(
+        DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $request->email],
             [
                 'email' => $request->email,
@@ -139,21 +136,18 @@ class AuthController extends Controller
             ]
         );
 
-        // Tạo link reset password
         $resetLink = route('password.reset', [
             'token' => $token,
             'email' => $request->email
         ]);
 
-        // Lấy thông tin user
         $user = User::where('email', $request->email)->first();
 
-        // Gửi email
         try {
             Mail::send('emails.reset-password', [
                 'resetLink' => $resetLink,
                 'userName' => $user->name
-            ], function($message) use($request) {
+            ], function ($message) use ($request) {
                 $message->to($request->email);
                 $message->subject('Đặt lại mật khẩu - Sky Music Store');
             });
@@ -193,8 +187,8 @@ class AuthController extends Controller
                 ->withInput();
         }
 
-        // Kiểm tra token trong database
-        $resetRecord = \DB::table('password_reset_tokens')
+        // Kiểm tra token 
+        $resetRecord = DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->first();
 
@@ -202,24 +196,20 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Token không hợp lệ hoặc đã hết hạn']);
         }
 
-        // Kiểm tra token có đúng không
         if (!Hash::check($request->token, $resetRecord->token)) {
             return back()->withErrors(['email' => 'Token không hợp lệ']);
         }
 
-        // Kiểm tra token đã quá 60 phút chưa
         if (Carbon::parse($resetRecord->created_at)->addMinutes(60)->isPast()) {
-            \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
             return back()->withErrors(['email' => 'Token đã hết hạn. Vui lòng yêu cầu lại']);
         }
 
-        // Cập nhật mật khẩu mới
         $user = User::where('email', $request->email)->first();
         $user->password = Hash::make($request->password);
         $user->save();
 
-        // Xóa token đã sử dụng
-        \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
         return redirect()->route('login')->with('status', '✅ Mật khẩu đã được đặt lại thành công! Vui lòng đăng nhập.');
     }

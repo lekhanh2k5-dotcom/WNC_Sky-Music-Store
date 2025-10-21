@@ -32,4 +32,12 @@ class Product extends Model
         'downloads_count' => 0,
         'is_active' => true,
     ];
+
+    /**
+     * Relationship: Product có nhiều purchases
+     */
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class);
+    }
 }

@@ -51,6 +51,31 @@
             <div class="max-w-6xl mx-auto">
                 <h2 class="orbitron text-5xl font-bold text-white text-center mb-16">🎼 Cửa Hàng Sheet Nhạc</h2>
                 
+                <!-- Search Bar -->
+                <div class="mb-8 max-w-2xl mx-auto">
+                    <form method="GET" action="{{ route('shop.index') }}" class="relative">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            value="{{ request('search') }}"
+                            placeholder="🔍 Tìm kiếm theo tên bài hát, tác giả, người soạn..." 
+                            class="w-full px-6 py-4 rounded-full bg-white bg-opacity-20 backdrop-blur-sm text-white placeholder-blue-200 inter focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                        <button 
+                            type="submit" 
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors font-semibold"
+                        >
+                            Tìm kiếm
+                        </button>
+                    </form>
+                    @if(request('search'))
+                        <div class="mt-3 text-center">
+                            <span class="text-blue-200 inter">Kết quả tìm kiếm cho: "<span class="text-white font-semibold">{{ request('search') }}</span>"</span>
+                            <a href="{{ route('shop.index') }}" class="ml-3 text-yellow-300 hover:text-yellow-400 underline">Xóa bộ lọc</a>
+                        </div>
+                    @endif
+                </div>
+                
                 <!-- Categories -->
                 <div class="flex flex-wrap justify-center gap-4 mb-12">
                     <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Tất Cả</button>
@@ -63,7 +88,7 @@
 
                 <!-- Products Grid -->
                 <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    @foreach($products as $product)
+                    @forelse($products as $product)
                         <div class="game-card rounded-xl p-4">
                             <div class="bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg mb-4 flex items-center justify-center" style="aspect-ratio: 16/9; width: 100%;">
                                 @if($product->image_path)
@@ -92,7 +117,13 @@
                                 </button>
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <div class="col-span-full text-center py-20">
+                            <div class="text-6xl mb-4">🔍</div>
+                            <h3 class="orbitron text-2xl font-bold text-white mb-2">Không tìm thấy sản phẩm</h3>
+                            <p class="inter text-blue-200">Thử tìm kiếm với từ khóa khác hoặc <a href="{{ route('shop.index') }}" class="text-yellow-300 hover:text-yellow-400 underline">xem tất cả sản phẩm</a></p>
+                        </div>
+                    @endforelse
                 </div>
                 
                 <!-- Pagination -->
