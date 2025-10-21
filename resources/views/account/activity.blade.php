@@ -13,7 +13,8 @@
                                     <h4 class="inter font-semibold text-white">Mua sheet nhạc</h4>
                                     <p class="inter text-gray-300 text-sm">
                                         Mua "{{ $activity->product->name }}" • 
-                                        {{ $activity->created_at->diffForHumans() }}
+                                        <span class="text-white font-semibold">{{ $activity->created_at->format('d/m/Y H:i') }}</span>
+                                        <span class="text-blue-300">({{ $activity->created_at->diffForHumans() }})</span>
                                     </p>
                                 </div>
                                 <div class="text-red-400 font-bold">-{{ number_format($activity->product->price, 0, ',', '.') }} 🪙</div>

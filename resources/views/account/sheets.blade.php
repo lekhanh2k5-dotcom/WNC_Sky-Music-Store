@@ -45,7 +45,10 @@
                     <td class="py-4 px-4 text-white">{{ $purchase->product->author }}</td>
                     <td class="py-4 px-4 text-white">{{ $purchase->product->transcribed_by }}</td>
                     <td class="py-4 px-4 text-yellow-300 font-bold">🪙 {{ number_format($purchase->coins_spent, 0, ',', '.') }}</td>
-                    <td class="py-4 px-4 text-white/80">{{ $purchase->created_at->format('d/m/Y H:i') }}</td>
+                    <td class="py-4 px-4">
+                        <div class="text-white font-semibold">{{ $purchase->created_at->format('d/m/Y H:i') }}</div>
+                        <div class="text-blue-200 text-xs">🕒 {{ $purchase->created_at->diffForHumans() }}</div>
+                    </td>
                     <td class="py-4 px-4 flex gap-2">
                         <a href="{{ route('account.download', $purchase->id) }}" 
                            class="px-4 py-1 rounded bg-green-500 hover:bg-green-600 text-white font-semibold shadow text-center">

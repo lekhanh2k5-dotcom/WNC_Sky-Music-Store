@@ -22,7 +22,11 @@ Route::group([], function () {
         Route::post('/remove', [App\Http\Controllers\CartController::class, 'remove'])->name('remove');
         Route::post('/checkout', [App\Http\Controllers\CartController::class, 'checkout'])->name('checkout');
     });
-    Route::get('/support', fn() => view('page.support.index'))->name('support.index');
+    // Support routes
+    Route::prefix('support')->name('support.')->group(function () {
+        Route::get('/', [App\Http\Controllers\SupportController::class, 'index'])->name('index');
+        Route::post('/send', [App\Http\Controllers\SupportController::class, 'sendSupport'])->name('send');
+    });
 });
 
 Route::group([], function () {
