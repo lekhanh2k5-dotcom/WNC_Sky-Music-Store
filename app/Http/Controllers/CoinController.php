@@ -59,8 +59,8 @@ class CoinController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:10000',
-            'payment_method' => 'required|in:vnpay,momo,zalopay,bank',
-            'account_info' => 'required|string|max:255'
+            'account_number' => 'required|string|max:50',
+            'bank_name' => 'required|string|max:100'
         ]);
 
         $amount = $request->amount;
@@ -82,9 +82,9 @@ class CoinController extends Controller
                 'coins' => $coins,
                 'type' => 'withdraw',
                 'status' => 'completed',
-                'payment_method' => $request->payment_method,
+                'payment_method' => 'bank',
                 'transaction_id' => 'WDW' . time() . Auth::id(),
-                'note' => 'Rút ' . number_format($coins, 0, ',', '.') . ' xu về ' . strtoupper($request->payment_method) . ' - ' . $request->account_info
+                'note' => 'Rút ' . number_format($coins, 0, ',', '.') . ' xu về ngân hàng ' . $request->bank_name . ' - STK: ' . $request->account_number
             ]);
 
             $user->coins -= $coins;
@@ -93,7 +93,7 @@ class CoinController extends Controller
             DB::commit();
 
             return redirect()->route('account.withdraw')
-                ->with('success', "✅ Rút thành công " . number_format($coins, 0, ',', '.') . " xu! Tiền sẽ chuyển về tài khoản " . $request->account_info . " trong 1-2 ngày làm việc.");
+                ->with('success', "✅ Yêu cầu rút " . number_format($coins, 0, ',', '.') . " xu đã được gửi! Tiền sẽ chuyển về tài khoản " . $request->account_number . " (" . $request->bank_name . ") trong 1-2 ngày làm việc.");
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('account.withdraw')

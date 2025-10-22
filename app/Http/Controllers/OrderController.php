@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Purchase;
+use App\Models\CoinTransaction;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -14,7 +15,17 @@ class OrderController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('admin.orders.orders', compact('orders'));
+        $deposits = CoinTransaction::with('user')
+            ->where('type', 'deposit')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        $withdrawals = CoinTransaction::with('user')
+            ->where('type', 'withdraw')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('admin.orders.orders', compact('orders', 'deposits', 'withdrawals'));
     }
 
 

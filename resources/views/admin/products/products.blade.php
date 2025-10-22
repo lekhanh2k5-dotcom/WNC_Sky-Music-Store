@@ -103,7 +103,6 @@
                 </div>
             </div>
 
-<!-- Modal xác nhận xóa -->
 <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4 border border-white border-opacity-20">
         <div class="text-center">
@@ -131,7 +130,6 @@
     </div>
 </div>
 
-<!-- Form ẩn để gửi DELETE request -->
 <form id="deleteForm" method="POST" style="display: none;">
     @csrf
     @method('DELETE')

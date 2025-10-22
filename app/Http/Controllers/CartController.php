@@ -29,9 +29,7 @@ class CartController extends Controller
         return view('page.shop.cart', compact('cart', 'total', 'cartCount', 'userCoins'));
     }
 
-    /**
-     * Thêm sản phẩm vào giỏ hàng
-     */
+
     public function add(Request $request)
     {
         $productId = $request->input('product_id');
@@ -124,9 +122,7 @@ class CartController extends Controller
         ]);
     }
 
-    /**
-     * Thanh toán 
-     */
+
     public function checkout(Request $request)
     {
         if (!Auth::check()) {

@@ -88,16 +88,12 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
 Route::prefix('account')->middleware('auth')->group(function () {
     Route::get('/', [App\Http\Controllers\AccountController::class, 'sheets'])->name('account.sheets');
-    Route::get('/profile', function () {
-        return view('account.profile');
-    })->name('account.profile');
     Route::get('/posts', function () {
         return view('account.posts');
     })->name('account.posts');
     Route::get('/activity', [App\Http\Controllers\AccountController::class, 'activity'])->name('account.activity');
-    Route::get('/settings', function () {
-        return view('account.settings');
-    })->name('account.settings');
+    Route::get('/settings', [App\Http\Controllers\AccountController::class, 'settings'])->name('account.settings');
+    Route::post('/settings', [App\Http\Controllers\AccountController::class, 'updateSettings'])->name('account.settings.update');
     Route::get('/deposit', [App\Http\Controllers\CoinController::class, 'index'])->name('account.deposit');
     Route::get('/withdraw', function () {
         return view('account.withdraw');

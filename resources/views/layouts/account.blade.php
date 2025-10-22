@@ -201,13 +201,15 @@
                 <div class="flex items-center gap-6 flex-1">
                     <div class="relative">
                         <div class="w-28 h-28 rounded-full bg-gradient-to-br from-yellow-300 to-pink-400 flex items-center justify-center shadow-xl border-4 border-white overflow-hidden">
-                            <img src="{{ asset('img/default-avatar.svg') }}" 
-                                 alt="Avatar {{ Auth::user()->name }}" 
-                                 class="w-full h-full object-cover rounded-full"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                            <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center" style="display: none;">
-                                <span class="text-white text-2xl font-bold">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
-                            </div>
+                            @if(Auth::user()->avatar)
+                                <img src="{{ asset(Auth::user()->avatar) }}" 
+                                     alt="Avatar {{ Auth::user()->name }}" 
+                                     class="w-full h-full object-cover rounded-full" />
+                            @else
+                                <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white text-3xl font-bold">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <div>

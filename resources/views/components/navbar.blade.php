@@ -16,31 +16,29 @@
         
         <div id="auth-section">
             @auth
-                <!-- Hiển thị khi đã đăng nhập -->
                 <div class="flex items-center space-x-4">
-                    <!-- Hiển thị thông tin user -->
                     <a href="{{ route('account.sheets') }}" class="flex items-center space-x-2 hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-lg transition-all">
-                        <img src="{{ asset('img/default-avatar.svg') }}" 
-                             alt="Avatar {{ Auth::user()->name }}" 
-                             class="w-10 h-10 rounded-full border-2 border-white border-opacity-50 object-cover shadow-lg"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-white border-opacity-50 shadow-lg" style="display: none;">
-                            <span class="text-white text-sm font-bold">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
-                        </div>
+                        @if(Auth::user()->avatar)
+                            <img src="{{ asset(Auth::user()->avatar) }}" 
+                                 alt="Avatar {{ Auth::user()->name }}" 
+                                 class="w-10 h-10 rounded-full border-2 border-white border-opacity-50 object-cover shadow-lg">
+                        @else
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-white border-opacity-50 shadow-lg">
+                                <span class="text-white text-sm font-bold">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                            </div>
+                        @endif
                         <div class="flex flex-col">
                             <span class="text-white inter text-sm font-medium">{{ Auth::user()->name }}</span>
                             <span class="text-blue-200 inter text-xs">Xem tài khoản</span>
                         </div>
                     </a>
 
-                    <!-- Hiển thị admin panel nếu là admin -->
                     @if(Auth::user()->is_admin)
                         <a href="{{ url('/admin') }}" class="bg-purple-500 bg-opacity-80 text-white px-4 py-2 rounded-lg hover:bg-opacity-100 transition-all inter">
                             👑 Admin
                         </a>
                     @endif
 
-                    <!-- Hiển thị số xu và giỏ hàng trên trang Shop -->
                         @if(request()->is('shop*'))
                             <span class="text-yellow-300 font-bold inter">💰 Xu: {{ Auth::user()->coins ?? 0 }}</span>
                             <a href="/shop/cart" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg hover:bg-opacity-30 transition-all inter">
@@ -48,7 +46,6 @@
                             </a>
                         @endif
 
-                    <!-- Form Đăng Xuất -->
                     <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                         @csrf
                         <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all inter">
@@ -57,7 +54,6 @@
                     </form>
                 </div>
             @else
-                <!-- Hiển thị khi chưa đăng nhập -->
                 <div class="flex items-center space-x-4">
                  
                     <a href="{{ route('login') }}" class="bg-white bg-opacity-20 text-white px-6 py-2 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">

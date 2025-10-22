@@ -65,37 +65,21 @@
             </div>
             
             <div>
-                <label class="block text-white font-semibold mb-2">Phương thức nhận tiền</label>
-                <div class="flex gap-4 flex-wrap">
-                    <label class="flex items-center gap-2 cursor-pointer bg-white/50 px-4 py-2 rounded-lg hover:bg-white/70 transition">
-                        <input type="radio" name="payment_method" value="vnpay" class="accent-blue-500" checked>
-                        <span class="text-blue-600 font-semibold">VNPay</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer bg-white/50 px-4 py-2 rounded-lg hover:bg-white/70 transition">
-                        <input type="radio" name="payment_method" value="momo" class="accent-pink-500">
-                        <span class="text-pink-600 font-semibold">Momo</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer bg-white/50 px-4 py-2 rounded-lg hover:bg-white/70 transition">
-                        <input type="radio" name="payment_method" value="zalopay" class="accent-blue-500">
-                        <span class="text-blue-700 font-semibold">ZaloPay</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer bg-white/50 px-4 py-2 rounded-lg hover:bg-white/70 transition">
-                        <input type="radio" name="payment_method" value="bank" class="accent-green-500">
-                        <span class="text-green-700 font-semibold">Ngân hàng</span>
-                    </label>
-                </div>
+                <label class="block text-white font-semibold mb-2">Số tài khoản ngân hàng</label>
+                <input type="text" name="account_number" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none" placeholder="VD: 1234567890" />
+                <p class="text-xs text-gray-200 mt-1">* Nhập số tài khoản ngân hàng của bạn</p>
             </div>
             
             <div>
-                <label class="block text-white font-semibold mb-2">Thông tin tài khoản nhận</label>
-                <input type="text" name="account_info" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none" placeholder="Nhập số điện thoại/số tài khoản..." />
-                <p class="text-xs text-gray-200 mt-1">* VD: 0123456789 (Momo/ZaloPay) hoặc 1234567890 (Ngân hàng)</p>
+                <label class="block text-white font-semibold mb-2">Tên ngân hàng</label>
+                <input type="text" name="bank_name" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none" placeholder="VD: Vietcombank, Techcombank, MB Bank..." />
+                <p class="text-xs text-gray-200 mt-1">* Nhập tên ngân hàng đầy đủ</p>
             </div>
             
             <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-red-400 to-orange-400 text-white font-bold text-lg shadow-lg hover:from-red-500 hover:to-orange-500 transition">
-                🏧 Rút tiền ngay
+                � Rút tiền về ngân hàng
             </button>
-            <div class="text-xs text-gray-200 mt-2 text-center">* Tỷ lệ: 1 xu = 1 VNĐ | Xu sẽ bị trừ ngay lập tức</div>
+            <div class="text-xs text-gray-200 mt-2 text-center">* Tỷ lệ: 1 xu = 1 VNĐ | Tiền sẽ chuyển về tài khoản trong 1-2 ngày làm việc</div>
         </form>
     </div>
 </div>
