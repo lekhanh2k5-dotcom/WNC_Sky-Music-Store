@@ -36,4 +36,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Purchase::class);
     }
+
+    /**
+     * Relationship với CoinTransaction
+     */
+    public function coinTransactions()
+    {
+        return $this->hasMany(CoinTransaction::class);
+    }
 }

@@ -95,25 +95,50 @@
                             <th class="text-left py-3 text-gray-300 inter">ID Giao Dịch</th>
                             <th class="text-left py-3 text-gray-300 inter">Người Nạp</th>
                             <th class="text-left py-3 text-gray-300 inter">Số Xu</th>
+                            <th class="text-left py-3 text-gray-300 inter">Phương Thức</th>
                             <th class="text-left py-3 text-gray-300 inter">Thời Gian</th>
                             <th class="text-left py-3 text-gray-300 inter">Trạng Thái</th>
-                            <th class="text-left py-3 text-gray-300 inter">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="table-row">
-                            <td class="py-4 text-white inter font-mono">#DEP-1001</td>
-                            <td class="py-4 text-white inter">user123</td>
-                            <td class="py-4 text-white inter">500</td>
-                            <td class="py-4 text-white inter">12/09/2025 10:30</td>
-                            <td class="py-4"><span class="status-badge status-pending">Chờ duyệt</span></td>
-                            <td class="py-4">
-                                <button class="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-white text-sm">Duyệt</button>
-                                <button class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm">Từ chối</button>
-                            </td>
-                        </tr>
+                        @if($deposits->count() > 0)
+                            @foreach($deposits as $deposit)
+                                <tr class="table-row">
+                                    <td class="py-4 text-white inter font-mono">{{ $deposit->transaction_id }}</td>
+                                    <td class="py-4">
+                                        <div>
+                                            <p class="text-white inter">{{ $deposit->user->name ?? 'N/A' }}</p>
+                                            <p class="text-gray-300 text-sm inter">{{ $deposit->user->email ?? 'N/A' }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-white inter font-semibold">{{ number_format($deposit->coins, 0, ',', '.') }} 🪙</td>
+                                    <td class="py-4">
+                                        <span class="inline-block bg-green-600 bg-opacity-20 text-green-200 px-3 py-1 rounded-full text-sm uppercase">
+                                            {{ $deposit->payment_method }}
+                                        </span>
+                                    </td>
+                                    <td class="py-4 text-white inter">{{ $deposit->created_at->format('d/m/Y H:i') }}</td>
+                                    <td class="py-4">
+                                        <span class="status-badge status-active">Hoàn thành</span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-gray-300 inter">
+                                    Chưa có giao dịch nạp xu nào
+                                </td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
+                
+                <!-- Pagination -->
+                @if($deposits->count() > 0)
+                    <div class="mt-6">
+                        {{ $deposits->links() }}
+                    </div>
+                @endif
             </div>
         </div>
         <!-- Rút xu -->
@@ -125,25 +150,54 @@
                             <th class="text-left py-3 text-gray-300 inter">ID Giao Dịch</th>
                             <th class="text-left py-3 text-gray-300 inter">Người Rút</th>
                             <th class="text-left py-3 text-gray-300 inter">Số Xu</th>
+                            <th class="text-left py-3 text-gray-300 inter">Thông Tin NH</th>
                             <th class="text-left py-3 text-gray-300 inter">Thời Gian</th>
                             <th class="text-left py-3 text-gray-300 inter">Trạng Thái</th>
-                            <th class="text-left py-3 text-gray-300 inter">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="table-row">
-                            <td class="py-4 text-white inter font-mono">#WDR-2001</td>
-                            <td class="py-4 text-white inter">user456</td>
-                            <td class="py-4 text-white inter">300</td>
-                            <td class="py-4 text-white inter">12/09/2025 11:00</td>
-                            <td class="py-4"><span class="status-badge status-pending">Chờ duyệt</span></td>
-                            <td class="py-4">
-                                <button class="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-white text-sm">Duyệt</button>
-                                <button class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm">Từ chối</button>
-                            </td>
-                        </tr>
+                        @if($withdrawals->count() > 0)
+                            @foreach($withdrawals as $withdrawal)
+                                <tr class="table-row">
+                                    <td class="py-4 text-white inter font-mono">{{ $withdrawal->transaction_id }}</td>
+                                    <td class="py-4">
+                                        <div>
+                                            <p class="text-white inter">{{ $withdrawal->user->name ?? 'N/A' }}</p>
+                                            <p class="text-gray-300 text-sm inter">{{ $withdrawal->user->email ?? 'N/A' }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-white inter font-semibold">{{ number_format($withdrawal->coins, 0, ',', '.') }} 🪙</td>
+                                    <td class="py-4">
+                                        <div class="text-white text-sm">
+                                            @if($withdrawal->note)
+                                                {{ Str::limit($withdrawal->note, 50) }}
+                                            @else
+                                                <span class="text-gray-400">N/A</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-white inter">{{ $withdrawal->created_at->format('d/m/Y H:i') }}</td>
+                                    <td class="py-4">
+                                        <span class="status-badge status-active">Hoàn thành</span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-gray-300 inter">
+                                    Chưa có giao dịch rút xu nào
+                                </td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
+                
+                <!-- Pagination -->
+                @if($withdrawals->count() > 0)
+                    <div class="mt-6">
+                        {{ $withdrawals->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>

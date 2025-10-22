@@ -37,7 +37,7 @@ class SupportController extends Controller
         }
 
         // Lấy email admin từ config hoặc env
-        $adminEmail = env('ADMIN_EMAIL', 'admin@skymusic.com');
+        $adminEmail = env('ADMIN_EMAIL', '23010584@st.phenikaa-uni.edu.vn');
 
         try {
             // Gửi email cho admin

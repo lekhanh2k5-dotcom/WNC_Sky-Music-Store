@@ -9,14 +9,12 @@
             <div class="game-card rounded-xl p-8">
                 <h2 class="orbitron text-3xl font-bold text-white text-center mb-8">🔑 Quên Mật Khẩu</h2>
                 
-                {{-- Hiển thị thông báo thành công --}}
                 @if (session('status'))
                     <div class="bg-green-500 bg-opacity-20 border border-green-500 text-green-100 px-4 py-3 rounded-lg mb-6 animate-fade-in">
                         ✅ {{ session('status') }}
                     </div>
                 @endif
 
-                {{-- Hiển thị lỗi --}}
                 @if ($errors->any())
                     <div class="bg-red-500 bg-opacity-20 border border-red-500 text-red-100 px-4 py-3 rounded-lg mb-6 animate-fade-in">
                         @foreach ($errors->all() as $error)
