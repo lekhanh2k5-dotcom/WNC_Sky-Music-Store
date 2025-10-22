@@ -22,7 +22,21 @@ Route::group([], function () {
         Route::post('/remove', [App\Http\Controllers\CartController::class, 'remove'])->name('remove');
         Route::post('/checkout', [App\Http\Controllers\CartController::class, 'checkout'])->name('checkout');
     });
-    Route::get('/support', fn() => view('page.support.index'))->name('support.index');
+
+    // Coin Routes
+    Route::prefix('coins')->name('coin.')->middleware('auth')->group(function () {
+        Route::get('/', [App\Http\Controllers\CoinController::class, 'index'])->name('index');
+        Route::post('/deposit', [App\Http\Controllers\CoinController::class, 'deposit'])->name('deposit');
+        Route::post('/withdraw', [App\Http\Controllers\CoinController::class, 'withdraw'])->name('withdraw');
+        Route::get('/callback', [App\Http\Controllers\CoinController::class, 'callback'])->name('callback');
+        Route::get('/history', [App\Http\Controllers\CoinController::class, 'history'])->name('history');
+    });
+
+    // Support routes
+    Route::prefix('support')->name('support.')->group(function () {
+        Route::get('/', [App\Http\Controllers\SupportController::class, 'index'])->name('index');
+        Route::post('/send', [App\Http\Controllers\SupportController::class, 'sendSupport'])->name('send');
+    });
 });
 
 Route::group([], function () {
@@ -84,9 +98,7 @@ Route::prefix('account')->middleware('auth')->group(function () {
     Route::get('/settings', function () {
         return view('account.settings');
     })->name('account.settings');
-    Route::get('/deposit', function () {
-        return view('account.deposit');
-    })->name('account.deposit');
+    Route::get('/deposit', [App\Http\Controllers\CoinController::class, 'index'])->name('account.deposit');
     Route::get('/withdraw', function () {
         return view('account.withdraw');
     })->name('account.withdraw');

@@ -76,15 +76,30 @@
                     @endif
                 </div>
                 
-                <!-- Categories -->
+                <!-- Categories Filter -->
                 <div class="flex flex-wrap justify-center gap-4 mb-12">
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Tất Cả</button>
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Việt Nam</button>
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Nhật Bản</button>
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Hàn Quốc</button>
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">Trung Quốc</button>
-                    <button class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter">US-UK</button>
+                    <!-- Nút Tất Cả -->
+                    <a href="{{ route('shop.index') }}" 
+                       class="px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter {{ !request('country') ? 'bg-blue-500 bg-opacity-80 text-white font-semibold' : 'bg-white bg-opacity-20 text-white' }}">
+                        Tất Cả
+                    </a>
+                    
+                    <!-- Các nút quốc gia từ database -->
+                    @foreach($countries as $country)
+                        <a href="{{ route('shop.index', ['country' => $country]) }}" 
+                           class="px-6 py-3 rounded-full backdrop-blur-sm hover:bg-opacity-30 transition-all inter {{ request('country') == $country ? 'bg-blue-500 bg-opacity-80 text-white font-semibold' : 'bg-white bg-opacity-20 text-white' }}">
+                            {{ $country }}
+                        </a>
+                    @endforeach
                 </div>
+                
+                <!-- Hiển thị quốc gia đang lọc -->
+                @if(request('country'))
+                    <div class="mb-6 text-center">
+                        <span class="text-blue-200 inter">Đang xem sản phẩm của: <span class="text-white font-semibold">{{ request('country') }}</span></span>
+                        <a href="{{ route('shop.index') }}" class="ml-3 text-yellow-300 hover:text-yellow-400 underline">Xem tất cả</a>
+                    </div>
+                @endif
 
                 <!-- Products Grid -->
                 <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -164,4 +179,30 @@
             </div>
         </div>
     </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" 
+            class="fixed bottom-8 right-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-full shadow-2xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 z-50 opacity-0 pointer-events-none"
+            onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+            style="transform: translateY(100px);">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+        </svg>
+    </button>
+
+    <script>
+        // Show/hide Back to Top button based on scroll position
+        window.addEventListener('scroll', function() {
+            const backToTopBtn = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                backToTopBtn.style.opacity = '1';
+                backToTopBtn.style.transform = 'translateY(0)';
+                backToTopBtn.style.pointerEvents = 'auto';
+            } else {
+                backToTopBtn.style.opacity = '0';
+                backToTopBtn.style.transform = 'translateY(100px)';
+                backToTopBtn.style.pointerEvents = 'none';
+            }
+        });
+    </script>
 @endsection

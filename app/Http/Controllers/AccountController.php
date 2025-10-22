@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Purchase;
+use App\Models\CoinTransaction;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
 {
@@ -39,10 +41,41 @@ class AccountController extends Controller
         $user = Auth::user();
 
         // Lấy lịch sử mua hàng
-        $activities = Purchase::with('product')
+        $purchases = Purchase::with('product')
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get()
+            ->map(function ($item) {
+                $item->activity_type = 'purchase';
+                return $item;
+            });
+
+        // Lấy lịch sử nạp/rút xu
+        $coinTransactions = CoinTransaction::where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $item->activity_type = 'coin';
+                return $item;
+            });
+
+        // Merge và sắp xếp theo thời gian
+        $allActivities = $purchases->merge($coinTransactions)
+            ->sortByDesc('created_at');
+
+        // Phân trang thủ công
+        $perPage = 20;
+        $currentPage = request()->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $activities = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allActivities->slice($offset, $perPage)->values(),
+            $allActivities->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         return view('account.activity', compact('activities'));
     }

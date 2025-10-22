@@ -37,9 +37,20 @@ class AdminUserSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+        User::updateOrCreate(
+            ['email' => '23010584@st.phenikaa-uni.edu.vn'],
+            [
+                'name' => 'Admin Tài',
+                'email' => '23010584@st.phenikaa-uni.edu.vn',
+                'password' => Hash::make('Motthang5000$'),
+                'is_admin' => true,
+                'email_verified_at' => now(),
+            ]
+        );
 
         echo "✅ Admin users created successfully!\n";
         echo "📧 admin@skymusic.com | 🔑 admin123\n";
         echo "📧 lekhanh@skymusic.com | 🔑 lekhanh123\n";
+        echo "📧 23010584@st.phenikaa-uni.edu.vn | 🔑 Motthang5000$\n";
     }
 }

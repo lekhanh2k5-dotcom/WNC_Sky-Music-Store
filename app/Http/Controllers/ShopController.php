@@ -11,7 +11,6 @@ class ShopController extends Controller
     {
         $query = Product::where('is_active', 1);
 
-        // Tìm kiếm theo tên hoặc tác giả
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -21,8 +20,18 @@ class ShopController extends Controller
             });
         }
 
+        if ($request->filled('country')) {
+            $query->where('country_region', $request->country);
+        }
+
         $products = $query->orderBy('created_at', 'desc')->paginate(12);
 
-        return view('page.shop.index', compact('products'));
+        $countries = Product::where('is_active', 1)
+            ->select('country_region')
+            ->distinct()
+            ->orderBy('country_region')
+            ->pluck('country_region');
+
+        return view('page.shop.index', compact('products', 'countries'));
     }
 }
